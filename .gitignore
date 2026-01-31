@@ -64,3 +64,5 @@ build/
 *.pb
 *.h5
 *.onnx
+*.ts
+*.pt

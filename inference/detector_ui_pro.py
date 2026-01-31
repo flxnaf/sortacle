@@ -1,0 +1,296 @@
+#!/usr/bin/env python3
+"""
+Sortacle - Recyclable Detection Pipeline (PRO Edition)
+Modern, elegant UI for demos with glassmorphism and rounded corners.
+Supports variable camera resolutions and native aspect ratios.
+"""
+
+import time
+import argparse
+import threading
+import queue
+import requests
+import cv2
+import numpy as np
+from camera import Camera
+from cloud_inference import run_cloud_inference, CLOUD_ENDPOINT, test_cloud_connection
+from local_inference import run_local_inference
+from recyclability import is_recyclable
+
+# Color Palette (Modern/Elegant)
+ACCENT_GREEN = (120, 230, 100)  # Recyclable
+ACCENT_RED = (100, 100, 255)    # Trash (BGR)
+ACCENT_BLUE = (255, 180, 80)    # UI Focus
+TEXT_WHITE = (245, 245, 245)
+
+def draw_rounded_rect(img, pt1, pt2, color, thickness, r, d):
+    """Draw a rounded rectangle"""
+    x1, y1 = pt1
+    x2, y2 = pt2
+    cv2.ellipse(img, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, thickness)
+    cv2.ellipse(img, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, thickness)
+    cv2.ellipse(img, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, thickness)
+    cv2.ellipse(img, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, thickness)
+    cv2.line(img, (x1 + r, y1), (x2 - r, y1), color, thickness)
+    cv2.line(img, (x1 + r, y2), (x2 - r, y2), color, thickness)
+    cv2.line(img, (x1, y1 + r), (x1, y2 - r), color, thickness)
+    cv2.line(img, (x2, y1 + r), (x2, y2 - r), color, thickness)
+
+def draw_filled_rounded_rect(img, pt1, pt2, color, r):
+    """Draw a filled rounded rectangle"""
+    mask = np.zeros(img.shape[:2], dtype=np.uint8)
+    x1, y1, x2, y2 = pt1[0], pt1[1], pt2[0], pt2[1]
+    cv2.circle(mask, (x1 + r, y1 + r), r, 255, -1)
+    cv2.circle(mask, (x2 - r, y1 + r), r, 255, -1)
+    cv2.circle(mask, (x1 + r, y2 - r), r, 255, -1)
+    cv2.circle(mask, (x2 - r, y2 - r), r, 255, -1)
+    cv2.rectangle(mask, (x1 + r, y1), (x2 - r, y2), 255, -1)
+    cv2.rectangle(mask, (x1, y1 + r), (x2, y2 - r), 255, -1)
+    img[mask > 0] = color
+
+class SortacleUIPro:
+    def __init__(self, confidence_threshold=0.50, display_fps=30.0):
+        self.latest_detections = []
+        self.detection_lock = threading.Lock()
+        self.inference_source = "none"
+        self.inference_time_ms = 0
+        self.confidence_threshold = confidence_threshold
+        self.display_fps = display_fps
+        self.paused = False
+        self.force_local = False
+        self.show_settings = True
+        self.running = True
+        self.camera = None
+        self.frame_queue = queue.Queue(maxsize=2)
+        self.frame_count = 0
+        self.detection_count = 0
+
+    def draw_glass_panel(self, frame, x1, y1, x2, y2, opacity=0.85):
+        """Draw a semi-transparent 'glass' panel"""
+        h, w = frame.shape[:2]
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(w, x2), min(h, y2)
+        if x2 <= x1 or y2 <= y1: return
+        sub_img = frame[y1:y2, x1:x2].copy()
+        black_rect = np.zeros_like(sub_img)
+        draw_filled_rounded_rect(black_rect, (0, 0), (x2-x1, y2-y1), (30, 30, 30), 15)
+        res = cv2.addWeighted(sub_img, 1 - opacity, black_rect, opacity, 0)
+        frame[y1:y2, x1:x2] = res
+        draw_rounded_rect(frame, (x1, y1), (x2, y2), (80, 80, 80), 1, 15, 0)
+
+    def draw_ui(self, frame: np.ndarray) -> np.ndarray:
+        h, w = frame.shape[:2]
+        display_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        
+        # Header
+        header_w = min(400, w // 2)
+        self.draw_glass_panel(display_frame, 20, 20, 20 + header_w, 75, 0.7)
+        cv2.putText(display_frame, "SORTACLE", (40, 55), cv2.FONT_HERSHEY_TRIPLEX, 0.9, TEXT_WHITE, 1, cv2.LINE_AA)
+        cv2.putText(display_frame, "Vision AI", (240 if header_w > 300 else 200, 53), cv2.FONT_HERSHEY_SIMPLEX, 0.45, ACCENT_BLUE, 1, cv2.LINE_AA)
+        
+        # Stats
+        stats_w = min(450, w // 2)
+        stats_x = w - stats_w - 20
+        self.draw_glass_panel(display_frame, stats_x, 20, w - 20, 75, 0.6)
+        inf_color = ACCENT_GREEN if self.inference_source == "cloud" else ACCENT_BLUE
+        cv2.putText(display_frame, f"SOURCE: {self.inference_source.upper()}", (stats_x + 20, 53), cv2.FONT_HERSHEY_SIMPLEX, 0.4, inf_color, 1, cv2.LINE_AA)
+        cv2.putText(display_frame, f"INF: {self.inference_time_ms:.0f}ms", (stats_x + 190, 53), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1, cv2.LINE_AA)
+        cv2.putText(display_frame, f"FPS: {self.display_fps:.0f}", (stats_x + 330, 53), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1, cv2.LINE_AA)
+
+        # Settings Panel
+        if self.show_settings:
+            p_w = 280
+            p_x = w - p_w - 20
+            self.draw_glass_panel(display_frame, p_x, 95, w - 20, h - 20, 0.9)
+            
+            y = 135
+            cv2.putText(display_frame, "CONFIDENCE", (p_x + 20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (180, 180, 180), 1, cv2.LINE_AA)
+            y += 25
+            cv2.line(display_frame, (p_x + 20, y), (p_x + 240, y), (80, 80, 80), 2)
+            s_pos = int(p_x + 20 + 220 * self.confidence_threshold)
+            cv2.circle(display_frame, (s_pos, y), 8, ACCENT_BLUE, -1)
+            cv2.putText(display_frame, f"{self.confidence_threshold:.0%}", (p_x + 210, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1)
+            
+            y += 50
+            btn_h = 35
+            p_color = (60, 150, 60) if self.paused else (60, 60, 150)
+            draw_filled_rounded_rect(display_frame, (p_x + 20, y), (p_x + 240, y + btn_h), p_color, 8)
+            label = "RESUME DETECTION" if self.paused else "PAUSE DETECTION"
+            cv2.putText(display_frame, label, (p_x + 55, y + 23), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_WHITE, 1, cv2.LINE_AA)
+            
+            y += 55
+            l_color = (150, 100, 30) if self.force_local else (60, 60, 60)
+            draw_filled_rounded_rect(display_frame, (p_x + 20, y), (p_x + 240, y + btn_h), l_color, 8)
+            cv2.putText(display_frame, "FORCE LOCAL AI", (p_x + 70, y + 23), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_WHITE, 1, cv2.LINE_AA)
+            
+            y = h - 60
+            cv2.putText(display_frame, f"Frames: {self.frame_count}", (p_x + 20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
+            cv2.putText(display_frame, f"Detections: {self.detection_count}", (p_x + 20, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
+        else:
+            cv2.putText(display_frame, "Press 'S' for Settings", (w - 180, h - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1, cv2.LINE_AA)
+
+        # Detections
+        with self.detection_lock:
+            detections = self.latest_detections.copy()
+        
+        if len(detections) > 0:
+            print(f"[UI] Drawing {len(detections)} detections on frame")
+            
+        for d in detections:
+            x1, y1, x2, y2 = d["bbox"]
+            x1 = int(x1 * w / 640)
+            x2 = int(x2 * w / 640)
+            y1 = int(y1 * h / 640)
+            y2 = int(y2 * h / 640)
+            
+            print(f"[UI] Drawing box: ({x1},{y1}) to ({x2},{y2}) for '{d['label']}'")
+            
+            rec = is_recyclable(d["label"])
+            color = ACCENT_GREEN if rec else ACCENT_RED
+            cv2.rectangle(display_frame, (x1, y1), (x2, y2), color, 2, cv2.LINE_AA)
+            
+            lbl = f"{'RECYCLE' if rec else 'TRASH'} | {d['label'].upper()}"
+            (tw, th), _ = cv2.getTextSize(lbl, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
+            tag_y1 = max(0, y1 - 25)
+            draw_filled_rounded_rect(display_frame, (x1, tag_y1), (x1 + tw + 20, tag_y1 + 25), color, 5)
+            cv2.putText(display_frame, lbl, (x1 + 10, tag_y1 + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv2.LINE_AA)
+
+        return display_frame
+
+    def mouse_callback(self, event, x, y, flags, param):
+        if event != cv2.EVENT_LBUTTONDOWN: return
+        try:
+            _, _, w, h = cv2.getWindowImageRect("Sortacle - Vision AI Pro")
+        except: return
+        
+        p_w, p_x = 280, w - 280 - 20
+        if self.show_settings:
+            if p_x + 20 <= x <= p_x + 240 and 150 <= y <= 170:
+                self.confidence_threshold = max(0.1, min(0.99, (x - (p_x + 20)) / 220))
+            elif p_x + 20 <= x <= p_x + 240 and 210 <= y <= 245:
+                self.paused = not self.paused
+            elif p_x + 20 <= x <= p_x + 240 and 265 <= y <= 300:
+                self.force_local = not self.force_local
+            elif x < p_x:
+                self.show_settings = False
+
+    def inference_thread(self):
+        print("\n[INFERENCE THREAD] Started")
+        inference_count = 0
+        while self.running:
+            if self.paused:
+                time.sleep(0.1); continue
+            try:
+                frame = None
+                while not self.frame_queue.empty(): frame = self.frame_queue.get_nowait()
+                if frame is None:
+                    time.sleep(0.1); continue
+                
+                inference_count += 1
+                print(f"\n[INFERENCE #{inference_count}] ========================================")
+                print(f"[INFERENCE] Frame shape: {frame.shape}")
+                
+                ai_frame = cv2.resize(frame, (640, 640))
+                print(f"[INFERENCE] Resized to: {ai_frame.shape}")
+                print(f"[INFERENCE] Confidence threshold: {self.confidence_threshold:.1%}")
+                
+                if self.force_local:
+                    print(f"[INFERENCE] Running LOCAL inference (forced)...")
+                    detections = run_local_inference(ai_frame)
+                    source = "local"
+                else:
+                    try:
+                        print(f"[INFERENCE] Attempting CLOUD inference...")
+                        detections = run_cloud_inference(ai_frame)
+                        source = "cloud"
+                        print(f"[INFERENCE] Cloud inference succeeded")
+                    except Exception as e:
+                        print(f"[INFERENCE] Cloud failed: {e}")
+                        print(f"[INFERENCE] Falling back to LOCAL inference...")
+                        detections = run_local_inference(ai_frame)
+                        source = "local"
+                
+                raw_detections = detections.get("detections", [])
+                print(f"[INFERENCE] Raw detections: {len(raw_detections)}")
+                
+                for i, d in enumerate(raw_detections):
+                    print(f"  [{i+1}] {d['label']}: {d['confidence']:.1%} @ {d['bbox']}")
+                
+                filtered = [d for d in raw_detections if d["confidence"] >= self.confidence_threshold]
+                print(f"[INFERENCE] After filtering (>= {self.confidence_threshold:.1%}): {len(filtered)}")
+                
+                for i, d in enumerate(filtered):
+                    print(f"  ✓ [{i+1}] {d['label']}: {d['confidence']:.1%}")
+                
+                with self.detection_lock:
+                    self.latest_detections = filtered
+                    self.inference_source = source
+                    self.inference_time_ms = detections.get("inference_time_ms", 0)
+                
+                self.detection_count += len(filtered)
+                print(f"[INFERENCE] Inference time: {self.inference_time_ms:.1f}ms")
+                print(f"[INFERENCE] Total detections so far: {self.detection_count}")
+                
+                time.sleep(0.4)
+            except Exception as e:
+                print(f"[INFERENCE ERROR] {e}")
+                import traceback
+                traceback.print_exc()
+                time.sleep(1)
+
+    def run(self):
+        print("\n" + "="*70)
+        print("Sortacle - Vision AI Pro")
+        print("="*70)
+        print("Press 'Q' or click red X to quit")
+        print("Press 'S' to toggle settings | SPACE to pause")
+        print("="*70 + "\n")
+        
+        self.camera = Camera()
+        inf_thread = threading.Thread(target=self.inference_thread, daemon=True)
+        inf_thread.start()
+        
+        win_name = "Sortacle - Vision AI Pro"
+        cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(win_name, 1280, 720)
+        cv2.setMouseCallback(win_name, self.mouse_callback)
+        
+        try:
+            while self.running:
+                start = time.time()
+                frame = self.camera.capture_frame()
+                if frame is None: continue
+                
+                self.frame_count += 1
+                if not self.paused and not self.frame_queue.full():
+                    self.frame_queue.put(frame.copy())
+                
+                display = self.draw_ui(frame)
+                cv2.imshow(win_name, display)
+                
+                key = cv2.waitKey(1) & 0xFF
+                
+                # Check if window was closed (red X button)
+                try:
+                    if cv2.getWindowProperty(win_name, cv2.WND_PROP_VISIBLE) < 1:
+                        print("\nWindow closed by user")
+                        break
+                except:
+                    break
+                
+                if key == ord('q'):
+                    print("\nQuitting...")
+                    break
+                elif key == ord(' '): self.paused = not self.paused
+                elif key == ord('s'): self.show_settings = not self.show_settings
+                
+                elapsed = time.time() - start
+                time.sleep(max(0, (1.0/self.display_fps) - elapsed))
+        finally:
+            self.running = False
+            self.camera.release()
+            cv2.destroyAllWindows()
+            print(f"Total frames: {self.frame_count}, Detections: {self.detection_count}")
+
+if __name__ == "__main__":
+    SortacleUIPro().run()
