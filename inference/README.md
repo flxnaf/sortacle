@@ -1,39 +1,130 @@
-# Sortacle Inference
+# Inference Service
 
-Machine learning inference service for Sortacle.
+Computer vision inference service for Sortacle. This service runs identically on edge devices or cloud infrastructure.
 
-## Setup
+## Edge → Cloud Architecture
+
+This inference service is designed to run in multiple deployment scenarios:
+
+1. **Edge Deployment**: Run directly on edge devices (Raspberry Pi, Jetson Nano, etc.)
+2. **Cloud Deployment**: Deploy on cloud VMs (AWS EC2, GCP Compute Engine, Azure VM)
+3. **Hybrid**: Process on edge when possible, fallback to cloud for heavy workloads
+
+The API design allows transparent switching between deployment modes without client-side changes.
+
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-# Create virtual environment
+cd inference
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Run
+### 2. Run the Server
 
 ```bash
-python inference_server.py
+python server.py
 ```
 
-## API
+The server will start on `http://0.0.0.0:8000`
 
-The inference service provides REST API endpoints for predictions.
+### 3. Test the API
 
-### Health Check
+In another terminal:
+
+```bash
+# First, get a test image
+curl -o test_image.jpg https://via.placeholder.com/640
+
+# Run the test client
+python test_client.py test_image.jpg
 ```
-GET /health
-```
 
-### Predict
-```
-POST /predict
-Content-Type: application/json
+## API Endpoints
 
+### `GET /`
+Health check endpoint
+
+**Response:**
+```json
 {
-    "data": [...your data...]
+  "status": "ok",
+  "service": "sortacle-inference"
 }
 ```
+
+### `POST /infer`
+Computer vision inference endpoint
+
+**Request:**
+- Method: POST
+- Content-Type: multipart/form-data
+- Body: Image file (JPEG/PNG)
+
+**Response:**
+```json
+{
+  "image_size": [640, 640, 3],
+  "detections": [
+    {
+      "bbox": [100, 150, 300, 400],
+      "label": "object_1",
+      "confidence": 0.92
+    }
+  ],
+  "model": "mock_detector_v1",
+  "inference_time_ms": 45.2
+}
+```
+
+## Project Structure
+
+```
+inference/
+├── server.py          # FastAPI application
+├── run_inference.py   # Core inference logic (currently mocked)
+├── test_client.py     # Test client
+├── requirements.txt   # Python dependencies
+└── README.md         # This file
+```
+
+## Model Integration
+
+Currently, `run_inference.py` returns mock predictions. To integrate a real model (e.g., YOLO):
+
+1. Add model dependency to `requirements.txt` (e.g., `ultralytics`, `torch`)
+2. Update `run_inference()` function in `run_inference.py`
+3. Load model weights
+4. Replace mock predictions with actual inference
+
+See comments in `run_inference.py` for integration guidance.
+
+## Deployment
+
+### Local Development
+```bash
+python server.py
+```
+
+### Production (Cloud VM)
+```bash
+# Using systemd, Docker, or PM2
+uvicorn server:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+### Cloud Considerations
+- Ensure firewall allows port 8000
+- Use HTTPS in production (add TLS termination)
+- Consider auto-scaling based on inference load
+- Monitor GPU utilization if using GPU acceleration
+
+## Next Steps
+
+- [ ] Integrate real computer vision model (YOLO, Faster R-CNN, etc.)
+- [ ] Add GPU acceleration support
+- [ ] Implement request queuing for high load
+- [ ] Add model versioning
+- [ ] Implement edge-to-cloud failover logic

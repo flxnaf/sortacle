@@ -1,19 +1,9 @@
-# Sortacle Website
+# Website
 
-Frontend application for Sortacle.
+This folder is reserved for future data visualization components:
+- Heatmaps
+- Dashboards
+- Sponsor-facing UI
+- Real-time inference monitoring
 
-## Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-```
+The website will integrate with the inference backend to display results and analytics.
