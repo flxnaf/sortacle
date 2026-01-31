@@ -6,11 +6,19 @@ Computer vision inference system with edge-to-cloud architecture.
 
 ```
 sortacle/
-├── website/          # Future: data visualization, dashboards, sponsor UI
+├── website/          # Sustainability dashboard & visualization UI
 └── inference/        # Computer vision inference service (edge/cloud)
 ```
 
 ## Quick Start
+
+### Website Dashboard
+
+```bash
+cd website
+python3 -m http.server 8080
+```
+Visit `http://localhost:8080` to view the dashboard.
 
 ### Inference Service
 
@@ -26,7 +34,7 @@ See `inference/README.md` for detailed documentation.
 
 ### Website
 
-Reserved for future data visualization components. See `website/README.md`.
+A beautifully stylized sustainability dashboard with interactive heatmaps and sponsor metrics. See `website/README.md` for preview instructions.
 
 ## Architecture
 
