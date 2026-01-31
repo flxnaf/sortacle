@@ -21,7 +21,7 @@ A beautifully modernized and stylized frontend for the Sortacle project, designe
 You can easily preview this dashboard locally using any of the following methods:
 
 ### Method 1: Python (Recommended)
-If you have Python installed, run this command inside the `websiteWITHGEM` folder:
+If you have Python installed, run this command inside the `website` folder:
 ```bash
 python3 -m http.server 8080
 ```
