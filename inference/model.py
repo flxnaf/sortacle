@@ -8,42 +8,23 @@ from ultralytics import YOLO
 import time
 
 # Define the EXACT categories we want to detect for waste sorting
-# YOLO-World uses CLIP embeddings - be descriptive!
+# YOLO-World uses CLIP embeddings - be descriptive but not too specific!
+# Simplified for better accuracy - fewer similar categories
 WASTE_CATEGORIES = [
-    # Recyclable metals
-    "aluminum can",
-    "metal can",
-    "soda can",
-    "beer can",
-    "can",
-    # Recyclable plastics
-    "plastic bottle",
-    "water bottle",
-    "bottle",
-    "plastic container",
-    # Recyclable glass
-    "glass bottle",
-    "glass jar",
-    # Recyclable paper/cardboard
+    # Recyclable items - simplified
+    "can",                  # Metal cans (soda, beer, etc.)
+    "bottle",              # Plastic/glass bottles
     "cardboard box",
     "cardboard",
     "paper",
-    "newspaper",
-    # Cups
-    "plastic cup",
-    "paper cup",
-    "coffee cup",
     "cup",
     # Non-recyclable items
     "plastic bag",
-    "bag",
     "chip bag",
-    "snack bag",
     "food package",
     "wrapper",
     "styrofoam",
     "foam container",
-    "food waste",
     "straw",
 ]
 

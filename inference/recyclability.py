@@ -3,41 +3,24 @@ Recyclability Logic
 Lookup table mapping waste categories to recyclable status
 """
 
-# Recyclability lookup table for YOLO-World custom categories
+# Recyclability lookup table - simplified to match detection classes
 # True = Recyclable, False = Non-recyclable/Trash
 RECYCLABILITY_TABLE = {
-    # Recyclable metals
-    "aluminum can": True,
-    "metal can": True,
-    "soda can": True,
-    "beer can": True,
+    # Recyclable (simplified)
     "can": True,
-    # Recyclable plastics
-    "plastic bottle": True,
-    "water bottle": True,
-    "plastic container": True,
     "bottle": True,
-    # Recyclable glass
-    "glass bottle": True,
-    "glass jar": True,
-    # Recyclable paper/cardboard
     "cardboard box": True,
     "cardboard": True,
     "paper": True,
-    "newspaper": True,
+    "cup": True,
     # Non-recyclable
     "plastic bag": False,
-    "bag": False,
     "chip bag": False,
-    "snack bag": False,
+    "food package": False,
     "wrapper": False,
-    "package": False,
     "styrofoam": False,
-    "foam": False,
-    "food waste": False,
-    "food scraps": False,
+    "foam container": False,
     "straw": False,
-    "utensils": False,
 }
 
 
