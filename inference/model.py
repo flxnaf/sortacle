@@ -15,9 +15,11 @@ WASTE_CATEGORIES = [
     "metal can",
     "soda can",
     "beer can",
+    "can",
     # Recyclable plastics
     "plastic bottle",
     "water bottle",
+    "bottle",
     "plastic container",
     # Recyclable glass
     "glass bottle",
@@ -31,11 +33,18 @@ WASTE_CATEGORIES = [
     "plastic cup",
     "paper cup",
     "coffee cup",
-    # Non-recyclable
+    "cup",
+    # Non-recyclable items
     "plastic bag",
+    "bag",
+    "chip bag",
+    "snack bag",
+    "food package",
+    "wrapper",
     "styrofoam",
+    "foam container",
     "food waste",
-    "food scraps",
+    "straw",
 ]
 
 print("Loading YOLO-World model for open-vocabulary waste detection...")
