@@ -397,11 +397,8 @@ class SortacleUIPro:
         
         win_name = "Sortacle - Vision AI Pro"
         cv2.namedWindow(win_name, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
-        cv2.resizeWindow(win_name, 640, 480)  # Smaller window for faster X11 forwarding
+        cv2.resizeWindow(win_name, 960, 640)  # Back to original size
         cv2.setMouseCallback(win_name, self.mouse_callback)
-        
-        last_display_time = 0
-        display_interval = 1.0 / self.display_fps
         
         try:
             while self.running:
@@ -410,16 +407,11 @@ class SortacleUIPro:
                 if frame is None: continue
                 
                 self.frame_count += 1
-                # Always process frames for inference (full speed)
                 if not self.paused and not self.frame_queue.full():
                     self.frame_queue.put(frame.copy())
                 
-                # Only update display at display_fps rate (for X11 efficiency)
-                time_since_display = start - last_display_time
-                if time_since_display >= display_interval:
-                    display = self.draw_ui(frame)
-                    cv2.imshow(win_name, display)
-                    last_display_time = start
+                display = self.draw_ui(frame)
+                cv2.imshow(win_name, display)
                 
                 key = cv2.waitKey(1) & 0xFF
                 
