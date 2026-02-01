@@ -160,10 +160,14 @@ class SortacleWebViewer:
                         recyclable = is_recyclable(best_detection['label'])
                         
                         if self.enable_logging and self.logger:
+                            # Create detection dict for logging
+                            detection_dict = {
+                                'label': best_detection['label'],
+                                'confidence': best_detection['confidence'],
+                                'recyclable': recyclable
+                            }
                             self.logger.log_disposal(
-                                item_name=best_detection['label'],
-                                recyclable=recyclable,
-                                confidence=best_detection['confidence'],
+                                detection=detection_dict,
                                 bin_id=self.bin_id,
                                 location=self.location
                             )
