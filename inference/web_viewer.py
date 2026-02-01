@@ -189,20 +189,15 @@ class SortacleWebViewer:
             return
         
         try:
-            # Reset to center
-            self.servo_kit.servo[SERVO_CH].angle = 0
-            time.sleep(0.5)
-            
-            # Open appropriate bin
-            target_angle = 80 if recyclable else 160
-            self.servo_kit.servo[SERVO_CH].angle = target_angle
+            # Open bins (90° exposes both bins - user has single open position)
+            self.servo_kit.servo[SERVO_CH].angle = 90
             bin_type = "♻️ RECYCLABLE" if recyclable else "🗑️ TRASH"
-            print(f"🔄 SERVO: Opening {bin_type} bin for '{label}'")
+            print(f"🔄 SERVO: Opening bins for {bin_type} item '{label}'")
             
             # Wait for item to clear
             time.sleep(3.0)
             
-            # Close bin
+            # Close bins
             self.servo_kit.servo[SERVO_CH].angle = 0
             print(f"↩️  SERVO: Closed")
             
