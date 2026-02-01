@@ -8,8 +8,8 @@ const chartCanvas = document.getElementById('trajectoryChart');
 if (chartCanvas) {
   const ctx = chartCanvas.getContext('2d');
   const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  gradient.addColorStop(0, 'rgba(27, 67, 50, 0.5)'); 
-  gradient.addColorStop(1, 'rgba(27, 67, 50, 0.0)');
+  gradient.addColorStop(0, 'rgba(45, 106, 79, 0.5)'); 
+  gradient.addColorStop(1, 'rgba(45, 106, 79, 0.0)');
 
   new Chart(ctx, {
       type: 'line',
@@ -18,14 +18,14 @@ if (chartCanvas) {
           datasets: [{
               label: 'Plastic Diverted (Tons)',
               data: [12, 19, 15, 25, 22, 30, 28],
-              borderColor: '#1b4332',
+              borderColor: '#2d6a4f',
               backgroundColor: gradient,
               borderWidth: 2,
               tension: 0.4,
               fill: true,
               pointRadius: 4,
               pointBackgroundColor: '#fff',
-              pointBorderColor: '#1b4332'
+              pointBorderColor: '#2d6a4f'
           }]
       },
       options: {
@@ -134,12 +134,12 @@ async function initMap() {
     const binIcon = L.divIcon({
         className: 'bin-marker',
         html: `<div style="
-            background: #1b4332; 
+            background: #2d6a4f; 
             width: 16px; 
             height: 16px; 
             border-radius: 50%; 
             border: 3px solid #ffffff; 
-            box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.3);">
+            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.3);">
         </div>`,
         iconSize: [20, 20],
         iconAnchor: [10, 10]
@@ -211,6 +211,15 @@ navItems.forEach(item => {
 
       const tabName = item.querySelector('span').textContent;
       titleElement.textContent = tabName === 'Overview' ? 'Project Overview' : tabName;
+
+      const descElement = document.getElementById('current-tab-desc');
+      const descriptions = {
+          'overview': 'Real-time telemetry and waste analytics.',
+          'dashboards': 'Live impact tracking and sorting statistics.',
+          'heatmaps': 'Geospatial distribution of the smart waste network.',
+          'mission': 'Our vision for a technology-driven circular economy.'
+      };
+      descElement.textContent = descriptions[tabId] || '';
   });
 });
 
@@ -233,8 +242,8 @@ navItems.forEach(item => {
                 datasets: [{
                     data: [2460, 960], // Start with dummy data so it shows immediately
                     backgroundColor: [
-                        '#1b4332', // Dark Green
-                        '#94a3b8'  // Grey
+                        '#2d6a4f', // Primary Green
+                        '#cbd5e1'  // Soft Slate
                     ],
                     borderWidth: 0,
                     hoverOffset: 4
@@ -295,8 +304,8 @@ navItems.forEach(item => {
                     label: 'Items Sorted',
                     data: [0,0,0,0,0,0,0], 
                     backgroundColor: '#74c69d',
-                    borderRadius: 4,
-                    hoverBackgroundColor: '#1b4332'
+                    borderRadius: 8,
+                    hoverBackgroundColor: '#2d6a4f'
                 }]
             },
             options: {

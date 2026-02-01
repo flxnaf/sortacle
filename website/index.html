@@ -24,7 +24,7 @@
         <nav class="sidebar">
             <div class="logo-area">
                 <div class="logo-icon">
-                    <i data-lucide="recycle" color="white" size="24"></i>
+                    <i data-lucide="recycle" size="24"></i>
                 </div>
                 <span class="logo-text">Sortacle</span>
             </div>
@@ -38,6 +38,9 @@
                 </li>
                 <li class="nav-item" data-tab="heatmaps">
                     <i data-lucide="map"></i> <span>Heatmaps</span>
+                </li>
+                <li class="nav-item" data-tab="mission">
+                    <i data-lucide="target"></i> <span>Mission</span>
                 </li>
             </ul>
 
@@ -54,7 +57,7 @@
             <div class="glass-header">
                 <div>
                     <h2 id="current-tab-title">Project Overview</h2>
-                    <p>Real-time telemetry and waste analytics.</p>
+                    <p id="current-tab-desc">Real-time telemetry and waste analytics.</p>
                 </div>
                 <div class="status-badge">
                     LIVE FEED
@@ -149,6 +152,54 @@
                         <div style="display: flex; justify-content: space-between; font-size: 12px;">
                             <span>Low</span><span>High</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mission" class="tab-pane">
+                <div class="hero-section mission-hero">
+                    <div class="hero-content">
+                        <h1>Mission</h1>
+                        <p>Accelerating the transition to a circular economy with real-time AI analysis.</p>
+                    </div>
+                </div>
+
+                <div class="mission-grid">
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>The Global Challenge</h3>
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <p>Global recycling rates are stalled below 9%. The primary culprit is contamination—when non-recyclable items are mixed into recycling bins, causing entire batches to be sent to landfills. Manual sorting is dangerous, expensive, and inefficient.</p>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>The Sortacle Solution</h3>
+                            <i data-lucide="cpu"></i>
+                        </div>
+                        <p>Sortacle uses Computer Vision and low-cost hardware (Raspberry Pi) to automate waste segregation at the source. By identifying materials the moment they enter the bin, we prevent contamination before it happens.</p>
+                        <ul style="margin-top: 16px; list-style: none; padding-left: 0; color: var(--text-muted); font-size: 15px;">
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Autonomous Sorting:</strong> No human intervention required.</li>
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Real-Time Data:</strong> Live tracking of waste generation.</li>
+                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Scalable Design:</strong> Built on affordable, open-source hardware.</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>Our Goal</h3>
+                            <i data-lucide="target"></i>
+                        </div>
+                        <p>To prove that smart infrastructure can increase recycling purity to 95%+ while reducing operational costs for facilities.</p>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>User Experience</h3>
+                            <i data-lucide="user-check"></i>
+                        </div>
+                        <p>The user simply drops an item into the bin. The system creates a seamless "drop-and-go" experience, handling the complex sorting logic instantly.</p>
                     </div>
                 </div>
             </div>
