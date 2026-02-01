@@ -87,18 +87,26 @@ class SortacleUIPro:
         # Servo control
         self.enable_servo = enable_servo and SERVO_AVAILABLE
         self.servo_kit = None
+        print(f"🔍 DEBUG: SERVO_AVAILABLE={SERVO_AVAILABLE}, enable_servo={enable_servo}")
         if self.enable_servo:
             try:
+                print("🔍 DEBUG: Calling get_kit()...")
                 self.servo_kit = get_kit(mock=mock_servo)
+                print(f"🔍 DEBUG: get_kit() returned: {self.servo_kit}")
                 # Force reset to center position (0°) on startup
                 print("🔄 Resetting servo to center position...")
+                print(f"🔍 DEBUG: Setting servo[{SERVO_CH}].angle = 0...")
                 self.servo_kit.servo[SERVO_CH].angle = 0
+                print("🔍 DEBUG: First angle set complete, sleeping 1.0s...")
                 time.sleep(1.0)  # Longer delay to ensure servo physically moves
                 self.servo_kit.servo[SERVO_CH].angle = 0  # Set again for reliability
+                print("🔍 DEBUG: Second angle set complete, sleeping 0.5s...")
                 time.sleep(0.5)
                 print("✅ Servo initialized at center position (0°)")
             except Exception as e:
                 print(f"⚠️  Failed to initialize servo: {e}")
+                import traceback
+                traceback.print_exc()
                 self.enable_servo = False
 
     def move_servo_for_item(self, recyclable: bool, current_label: str):
@@ -109,11 +117,16 @@ class SortacleUIPro:
             recyclable: True for recyclable bin, False for trash bin
             current_label: Label of detected item (e.g., "glass bottle")
         """
+        print(f"🔍 DEBUG: move_servo_for_item called - recyclable={recyclable}, label={current_label}")
+        print(f"🔍 DEBUG: enable_servo={self.enable_servo}, servo_kit={self.servo_kit}")
+        
         if not self.enable_servo or not self.servo_kit:
+            print("🔍 DEBUG: Servo not enabled or not available, returning")
             return
         
         try:
             # 0. Reset to center position first (in case servo is already rotated)
+            print(f"🔍 DEBUG: Setting servo to 0° (reset)...")
             self.servo_kit.servo[SERVO_CH].angle = 0
             print(f"🔄 SERVO: Resetting to center (0°)")
             time.sleep(0.5)  # Brief pause to ensure reset completes
@@ -122,6 +135,7 @@ class SortacleUIPro:
             # 0° = CLOSED/CENTER, Higher angles = OPEN
             target_angle = 80 if recyclable else 160  # Recyclable left, Trash right
             
+            print(f"🔍 DEBUG: Setting servo to {target_angle}° (open)...")
             self.servo_kit.servo[SERVO_CH].angle = target_angle
             bin_type = "♻️ RECYCLABLE" if recyclable else "🗑️ TRASH"
             print(f"🔄 SERVO: Opening {bin_type} bin (angle {target_angle}°)")
@@ -165,11 +179,14 @@ class SortacleUIPro:
                 print(f"⚠️  SERVO: Timeout waiting for item to clear (waited {waited:.1f}s)")
             
             # 4. Close the bin (return to center)
+            print(f"🔍 DEBUG: Setting servo to 0° (close)...")
             self.servo_kit.servo[SERVO_CH].angle = 0
             print(f"↩️  SERVO: Closed - ready for next item (0°)")
             
         except Exception as e:
             print(f"⚠️  Servo movement error: {e}")
+            import traceback
+            traceback.print_exc()
             # Emergency: return to center position
             try:
                 self.servo_kit.servo[SERVO_CH].angle = 0
