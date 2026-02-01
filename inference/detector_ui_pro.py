@@ -14,7 +14,6 @@ import cv2
 import numpy as np
 from camera import Camera
 from cloud_inference import run_cloud_inference, CLOUD_ENDPOINT, test_cloud_connection
-from local_inference import run_local_inference
 from recyclability import is_recyclable
 from data_logger import DataLogger
 
@@ -207,21 +206,16 @@ class SortacleUIPro:
                 print(f"[INFERENCE] Resized to: {ai_frame.shape}")
                 print(f"[INFERENCE] Confidence threshold: {self.confidence_threshold:.1%}")
                 
-                if self.force_local:
-                    print(f"[INFERENCE] Running LOCAL inference (forced)...")
-                    detections = run_local_inference(ai_frame)
-                    source = "local"
-                else:
-                    try:
-                        print(f"[INFERENCE] Attempting CLOUD inference...")
-                        detections = run_cloud_inference(ai_frame)
-                        source = "cloud"
-                        print(f"[INFERENCE] Cloud inference succeeded")
-                    except Exception as e:
-                        print(f"[INFERENCE] Cloud failed: {e}")
-                        print(f"[INFERENCE] Falling back to LOCAL inference...")
-                        detections = run_local_inference(ai_frame)
-                        source = "local"
+                try:
+                    print(f"[INFERENCE] Attempting CLOUD inference...")
+                    detections = run_cloud_inference(ai_frame)
+                    source = "cloud"
+                    print(f"[INFERENCE] Cloud inference succeeded")
+                except Exception as e:
+                    print(f"[INFERENCE] Cloud inference failed: {e}")
+                    print(f"[INFERENCE] Skipping this frame (no local fallback)")
+                    time.sleep(1)
+                    continue
                 
                 raw_detections = detections.get("detections", [])
                 print(f"[INFERENCE] Raw detections: {len(raw_detections)}")
