@@ -43,6 +43,9 @@ WASTE_CATEGORIES = [
     "toy",                 # Plastic waste
     "plastic wrapper",     # More general wrapper
     "food container",      # General container
+    "wire",                # Cables/wires - e-waste
+    "cable",               # Power cables, USB cables
+    "cord",                # Extension cords, charging cords
 ]
 
 print("Loading YOLO-World model for open-vocabulary waste detection...")

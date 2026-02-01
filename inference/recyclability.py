@@ -39,6 +39,9 @@ RECYCLABILITY_TABLE = {
     "pen": False,
     "pencil": False,
     "toy": False,
+    "wire": False,             # E-waste
+    "cable": False,            # E-waste
+    "cord": False,             # E-waste
 }
 
 
