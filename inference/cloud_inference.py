@@ -12,7 +12,7 @@ import requests
 # Set via environment variable: export CLOUD_INFERENCE_URL="http://your-vm-ip:8000"
 # Default: localhost for local testing
 CLOUD_ENDPOINT = os.getenv("CLOUD_INFERENCE_URL", "http://localhost:8000")
-TIMEOUT_SECONDS = 5
+TIMEOUT_SECONDS = 15  # Increased from 5 to handle YOLO-World processing time
 
 
 def run_cloud_inference(frame: np.ndarray) -> dict:

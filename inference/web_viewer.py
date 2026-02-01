@@ -100,6 +100,7 @@ class SortacleWebViewer:
         self.frame_queue = queue.Queue(maxsize=2)
         self.latest_frame = None
         self.frame_lock = threading.Lock()
+        self.frame_counter = 0  # For skipping frames to reduce server load
         
         # Data logging
         self.enable_logging = enable_logging
@@ -184,20 +185,26 @@ class SortacleWebViewer:
                 print(f"⚠️  Inference error: {e}")
     
     def move_servo_for_item(self, recyclable: bool, label: str):
-        """Move servo based on recyclability"""
+        """Move servo based on recyclability - directs to appropriate bin"""
         if not self.enable_servo or not self.servo_kit:
             return
         
         try:
-            # Open bins (90° exposes both bins - user has single open position)
-            self.servo_kit.servo[SERVO_CH].angle = 90
-            bin_type = "♻️ RECYCLABLE" if recyclable else "🗑️ TRASH"
-            print(f"🔄 SERVO: Opening bins for {bin_type} item '{label}'")
+            # Direct to appropriate bin with different angles
+            if recyclable:
+                target_angle = 160  # Recyclable bin
+                bin_type = "♻️ RECYCLABLE"
+            else:
+                target_angle = 80   # Trash bin
+                bin_type = "🗑️ TRASH"
+            
+            self.servo_kit.servo[SERVO_CH].angle = target_angle
+            print(f"🔄 SERVO: Opening {bin_type} bin for '{label}' ({target_angle}°)")
             
             # Wait for item to clear
             time.sleep(3.0)
             
-            # Close bins
+            # Close/reset to center
             self.servo_kit.servo[SERVO_CH].angle = 0
             print(f"↩️  SERVO: Closed")
             
@@ -239,11 +246,13 @@ class SortacleWebViewer:
         # Convert RGB to BGR for OpenCV drawing
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         
-        # Queue frame for inference (non-blocking)
-        try:
-            self.frame_queue.put_nowait(frame.copy())
-        except queue.Full:
-            pass
+        # Only send every 5th frame to cloud to reduce server load
+        self.frame_counter += 1
+        if self.frame_counter % 5 == 0:
+            try:
+                self.frame_queue.put_nowait(frame.copy())
+            except queue.Full:
+                pass
         
         # Draw detections
         frame = self.draw_detections(frame)
