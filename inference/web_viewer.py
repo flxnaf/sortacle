@@ -26,60 +26,171 @@ except ImportError:
 # HTML template for web viewer
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sortacle Live Stream</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortacle Live | AI Controller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --danger: #ef4444;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text);
             margin: 0;
-            padding: 20px;
-            background: #1a1a1a;
-            color: #fff;
-            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-        h1 {
-            margin-bottom: 10px;
-            color: #78e6a0;
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
         }
-        .info {
-            margin-bottom: 20px;
-            color: #aaa;
+        .header h1 { 
+            margin: 0; 
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
-        img {
-            max-width: 90%;
-            border: 2px solid #78e6a0;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        .header p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+        
+        .container {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 800px;
+            width: 100%;
+        }
+        .video-wrapper {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            line-height: 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .video-feed { 
+            width: 100%;
+            height: auto;
         }
         .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
         }
         button {
-            padding: 10px 20px;
+            padding: 16px 24px;
             font-size: 16px;
-            border: none;
-            border-radius: 4px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .recyclable { background: #78e6a0; color: #000; }
-        .trash { background: #ff6b6b; color: #fff; }
-        .center { background: #888; color: #fff; }
+        .btn-open {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-open:hover { 
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .btn-close {
+            background: #475569;
+            color: white;
+        }
+        .btn-close:hover { 
+            background: #334155;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .status-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            z-index: 10;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+        footer {
+            margin-top: auto;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>🌱 Sortacle Live Stream</h1>
-    <div class="info">Real-time object detection and sorting</div>
-    <img src="{{ url_for('video_feed') }}" />
-    <div class="controls">
-        <button class="recyclable" onclick="fetch('/servo/open')">📂 Open Bins</button>
-        <button class="center" onclick="fetch('/servo/close')">⏹️ Close Bins</button>
+    <div class="header">
+        <h1>🌱 Sortacle Live</h1>
+        <p>Real-time AI Vision & Robotics Controller</p>
     </div>
+
+    <div class="container">
+        <div class="video-wrapper">
+            <div class="status-badge">
+                <div class="dot"></div>
+                LIVE FEED
+            </div>
+            <img class="video-feed" src="{{ url_for('video_feed') }}" alt="Live Feed">
+        </div>
+        
+        <div class="controls">
+            <button class="btn-open" onclick="fetch('/servo/open')">
+                <span>📂</span> Open Bins
+            </button>
+            <button class="btn-close" onclick="fetch('/servo/close')">
+                <span>⏹️</span> Close Bins
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Sortacle AI. All systems operational.
+    </footer>
 </body>
 </html>
 """

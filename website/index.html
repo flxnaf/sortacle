@@ -77,6 +77,23 @@
                         <h1>Waste Sorting,<br>Reimagined by AI.</h1>
                         <p>Sortacle uses advanced computer vision and robotics to segregate waste at the source.</p>
                         
+                        <div class="live-stats-row home-stats">
+                            <div class="live-stat-box">
+                                <div class="stat-icon recyclable">♻️</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="recyclable-count">0</div>
+                                    <div class="stat-label">Recyclable</div>
+                                </div>
+                            </div>
+                            <div class="live-stat-box">
+                                <div class="stat-icon non-recyclable">🗑️</div>
+                                <div class="stat-content">
+                                    <div class="stat-number" id="non-recyclable-count">0</div>
+                                    <div class="stat-label">Non-Recyclable</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="hero-actions">
                             <button class="btn-primary" id="btn-view-network">View Live Network</button>
                         </div>
@@ -117,31 +134,10 @@
             <div id="realtime" class="tab-pane">
                 <div class="providence-banner">
                     <div class="banner-content">
-                        <span class="banner-overline">LIVE SORTING STATISTICS</span>
-                        <div class="live-stats-row">
-                            <div class="live-stat-box">
-                                <div class="stat-icon recyclable">♻️</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="recyclable-count">0</div>
-                                    <div class="stat-label">Recyclable</div>
-                                </div>
-                            </div>
-                            <div class="live-stat-box">
-                                <div class="stat-icon non-recyclable">🗑️</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="non-recyclable-count">0</div>
-                                    <div class="stat-label">Non-Recyclable</div>
-                                </div>
-                            </div>
-                            <div class="live-stat-box">
-                                <div class="stat-icon total">📊</div>
-                                <div class="stat-content">
-                                    <div class="stat-number" id="total-count">0</div>
-                                    <div class="stat-label">Total Items</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="status-pill"><span class="dot-pulse"></span> Live Connection Active</div>
+                        <span class="banner-overline">PROVIDENCE NETWORK ACTIVITY</span>
+                        <div id="total-count" class="large-counter">0</div>
+                        <p class="banner-sub">Items diverted from landfill today</p>
+                        <div class="status-pill"><span class="dot-pulse"></span> 12 Bins Online</div>
                     </div>
                 </div>
                 <div class="stats-grid">
