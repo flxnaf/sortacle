@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sortacle | Smart Waste Network</title>
+    <title>Sortacle | AI Waste Sorting</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -24,116 +24,147 @@
         <nav class="sidebar">
             <div class="logo-area">
                 <div class="logo-icon">
-                    <i data-lucide="recycle" size="24"></i>
+                    <i data-lucide="sprout" color="white" size="24"></i>
                 </div>
                 <span class="logo-text">Sortacle</span>
             </div>
 
             <ul class="nav-tabs">
-                <li class="nav-item active" data-tab="overview">
-                    <i data-lucide="home"></i> <span>Overview</span>
+                <li class="nav-item" data-tab="home">
+                    <i data-lucide="layout-grid"></i> <span>Home</span>
                 </li>
-                <li class="nav-item" data-tab="dashboards">
-                    <i data-lucide="activity"></i> <span>Live Network</span>
-                </li>
-                <li class="nav-item" data-tab="heatmaps">
+                <li class="nav-item active" data-tab="heatmaps">
                     <i data-lucide="map"></i> <span>Heatmaps</span>
                 </li>
+                <li class="nav-item" data-tab="realtime">
+                    <i data-lucide="activity"></i> <span>Real-time</span>
+                </li>
                 <li class="nav-item" data-tab="mission">
-                    <i data-lucide="target"></i> <span>Mission</span>
+                    <i data-lucide="book-open"></i> <span>Mission</span>
                 </li>
             </ul>
 
             <div class="sidebar-footer">
-                <div class="status-indicator">
-                    <span class="dot"></span> System Online
+                <div class="nav-item footer-link">
+                    <i data-lucide="settings"></i> <span>Settings</span>
                 </div>
-                <p>Providence, RI</p>
+                <div class="nav-item footer-link">
+                    <i data-lucide="life-buoy"></i> <span>Support</span>
+                </div>
             </div>
         </nav>
 
         <main class="main-content">
             
             <div class="glass-header">
-                <div>
-                    <h2 id="current-tab-title">Project Overview</h2>
-                    <p id="current-tab-desc">Real-time telemetry and waste analytics.</p>
+                <div class="header-left">
+                    <h2 id="current-tab-title">Heatmaps</h2>
+                    <p id="current-tab-desc">Autonomous waste sorting using computer vision and robotics to eliminate contamination at the source.</p>
                 </div>
-                <div class="status-badge">
-                    LIVE FEED
-                </div>
-            </div>
-
-            <div id="overview" class="tab-pane active">
-                <div class="hero-section">
-                    <div class="hero-content">
-                        <h1>Waste Sorting, Reimagined.</h1>
-                        <p>Sortacle uses AI to identify and sort waste at the source.</p>
-                    </div>
-                </div>
-
-                <div class="content-card">
-                    <div class="section-header">
-                        <h3>Sustainability Trajectory</h3>
-                    </div>
-                    <div style="height: 300px; width: 100%;">
-                        <canvas id="trajectoryChart"></canvas>
-                    </div>
+                <div class="header-right">
+                    <button class="icon-btn"><i data-lucide="search"></i></button>
+                    <button class="icon-btn"><i data-lucide="bell"></i></button>
+                    <button class="icon-btn dark-btn"><i data-lucide="plus"></i></button>
                 </div>
             </div>
 
-            <div id="dashboards" class="tab-pane">
+            <div id="home" class="tab-pane active">
                 
-                <div class="counter-card">
-                    <h3>Total Items Diverted</h3>
-                    <div id="live-counter">0</div>
-                    <p>Items processed today</p>
+                <div class="home-hero">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <span class="pill-badge">Now Live in Providence</span>
+                        <h1>Waste Sorting,<br>Reimagined by AI.</h1>
+                        <p>Sortacle uses advanced computer vision and robotics to segregate waste at the source.</p>
+                        
+                        <div class="hero-actions">
+                            <button class="btn-primary" id="btn-view-network">View Live Network</button>
+                        </div>
+                    </div>
                 </div>
 
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon-square"><i data-lucide="scan-line"></i></div>
+                        <h3>Computer Vision</h3>
+                        <p>Our proprietary model identifies materials (PET, HDPE, Paper) in under 120ms with 98% accuracy.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-square"><i data-lucide="settings-2"></i></div>
+                        <h3>Robotic Sorting</h3>
+                        <p>Automated flippers divert waste into the correct bin instantly, removing human error entirely.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-square"><i data-lucide="bar-chart-3"></i></div>
+                        <h3>Real-Time Data</h3>
+                        <p>We track every item sorted, providing universities and cities with actionable waste insights.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="heatmaps" class="tab-pane active">
+                <div class="content-card wide-card">
+                    <div class="card-header-row">
+                        <h3>Geospatial Waste Density</h3>
+                        <span class="status-text-right">Live inference nodes detecting high-density plastic waste clusters.</span>
+                    </div>
+                    
+                    <div id="map" class="map-container"></div>
+                    
+                </div>
+            </div>
+
+            <div id="realtime" class="tab-pane">
+                <div class="providence-banner">
+                    <div class="banner-content">
+                        <span class="banner-overline">PROVIDENCE NETWORK ACTIVITY</span>
+                        <div id="live-counter">4,625</div>
+                        <p class="banner-sub">Items diverted from landfill today</p>
+                        <div class="status-pill"><span class="dot-pulse"></span> 12 Bins Online</div>
+                    </div>
+                </div>
                 <div class="stats-grid">
                     <div class="content-card">
                         <div class="section-header">
-                            <h3>Real-Time Impact</h3>
-                            <i data-lucide="sprout"></i>
+                            <h3>Community Impact</h3>
+                            <i data-lucide="sprout" class="icon-dark"></i>
                         </div>
                         <div class="impact-list">
                             <div class="impact-row">
-                                <span>Trees Saved</span>
-                                <strong id="impact-trees">0</strong>
+                                <span class="stat-label"><i data-lucide="trees" size="16"></i> Trees Saved</span>
+                                <strong id="impact-trees" class="text-green">3.10</strong>
                             </div>
                             <div class="impact-row">
-                                <span>Energy (kWh)</span>
-                                <strong id="impact-energy">0</strong>
+                                <span class="stat-label"><i data-lucide="zap" size="16"></i> Energy (kWh)</span>
+                                <strong id="impact-energy" class="text-yellow">834</strong>
                             </div>
                             <div class="impact-row">
-                                <span>CO2 Avoided (kg)</span>
-                                <strong id="impact-co2">0</strong>
+                                <span class="stat-label"><i data-lucide="cloud" size="16"></i> CO₂ Avoided</span>
+                                <strong id="impact-co2" class="text-blue">556.3kg</strong>
                             </div>
                         </div>
                     </div>
-
                     <div class="content-card">
                         <div class="section-header">
-                            <h3>Composition</h3>
+                            <h3>Live Composition</h3>
+                            <span class="sub-label">Avg. across active bins</span>
                         </div>
                         <div style="height: 200px;">
                             <canvas id="compositionChart"></canvas>
                         </div>
                     </div>
                 </div>
-
                 <div class="content-card">
                     <div class="chart-header-row">
-                        <h3>Sorting History</h3>
-                        
+                        <div>
+                            <h3>Sorting History</h3>
+                            <p class="sub-text">Total items processed</p>
+                        </div>
                         <div class="calendar-controls">
-                            <button id="prevWeek">←</button>
-                            <span id="dateRangeLabel">Loading...</span>
-                            <button id="nextWeek">→</button>
-                            <div style="position: relative; display: inline-block;">
-                                <input type="month" id="monthPicker" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
-                                <button>📅</button>
-                            </div>
+                            <button class="cal-nav">←</button>
+                            <span>Jan 26 - Feb 1</span>
+                            <button class="cal-nav">→</button>
+                            <button class="cal-icon"><i data-lucide="calendar" size="16"></i></button>
                         </div>
                     </div>
                     <div style="height: 300px;">
@@ -142,64 +173,46 @@
                 </div>
             </div>
 
-            <div id="heatmaps" class="tab-pane">
-                <div class="content-card" style="height: 600px; padding: 0; overflow: hidden; position: relative;">
-                    <div id="map" style="width: 100%; height: 100%;"></div>
-                    
-                    <div class="map-legend">
-                        <h4>Network Density</h4>
-                        <div class="legend-gradient"></div>
-                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                            <span>Low</span><span>High</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div id="mission" class="tab-pane">
-                <div class="hero-section mission-hero">
-                    <div class="hero-content">
-                        <h1>Mission</h1>
-                        <p>Accelerating the transition to a circular economy with real-time AI analysis.</p>
+                <div class="content-card">
+                    <div class="section-header">
+                        <h2>The Global Challenge</h2>
+                        <i data-lucide="alert-triangle" class="icon-red"></i>
                     </div>
+                    <p class="card-text">
+                        Global recycling rates are stalled below 9%. The primary culprit is <strong>contamination</strong>—when non-recyclable items are mixed into recycling bins, causing entire batches to be sent to landfills. Manual sorting is dangerous, expensive, and inefficient.
+                    </p>
                 </div>
-
-                <div class="mission-grid">
-                    <div class="content-card">
-                        <div class="section-header">
-                            <h3>The Global Challenge</h3>
-                            <i data-lucide="alert-triangle"></i>
-                        </div>
-                        <p>Global recycling rates are stalled below 9%. The primary culprit is contamination—when non-recyclable items are mixed into recycling bins, causing entire batches to be sent to landfills. Manual sorting is dangerous, expensive, and inefficient.</p>
+                <div class="content-card">
+                    <div class="section-header">
+                        <h2>The Sortacle Solution</h2>
+                        <i data-lucide="lightbulb" class="icon-yellow"></i>
                     </div>
-
-                    <div class="content-card">
-                        <div class="section-header">
-                            <h3>The Sortacle Solution</h3>
-                            <i data-lucide="cpu"></i>
-                        </div>
-                        <p>Sortacle uses Computer Vision and low-cost hardware (Raspberry Pi) to automate waste segregation at the source. By identifying materials the moment they enter the bin, we prevent contamination before it happens.</p>
-                        <ul style="margin-top: 16px; list-style: none; padding-left: 0; color: var(--text-muted); font-size: 15px;">
-                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Autonomous Sorting:</strong> No human intervention required.</li>
-                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Real-Time Data:</strong> Live tracking of waste generation.</li>
-                            <li style="margin-bottom: 8px;"><strong style="color: var(--primary);">• Scalable Design:</strong> Built on affordable, open-source hardware.</li>
+                    <p class="card-text">
+                        Sortacle uses <strong>Computer Vision</strong> and low-cost hardware (Raspberry Pi) to automate waste segregation at the source. By identifying materials the moment they enter the bin, we prevent contamination before it happens.
+                    </p>
+                    <div class="solution-list">
+                        <ul>
+                            <li><strong>Autonomous Sorting:</strong> No human intervention required.</li>
+                            <li><strong>Real-Time Data:</strong> Live tracking of waste generation.</li>
+                            <li><strong>Scalable Design:</strong> Built on affordable, open-source hardware.</li>
                         </ul>
                     </div>
-
+                </div>
+                <div class="stats-grid">
                     <div class="content-card">
                         <div class="section-header">
                             <h3>Our Goal</h3>
-                            <i data-lucide="target"></i>
+                            <i data-lucide="target" class="icon-green-circle"></i>
                         </div>
-                        <p>To prove that smart infrastructure can increase recycling purity to 95%+ while reducing operational costs for facilities.</p>
+                        <p class="card-text-sm">To prove that smart infrastructure can increase recycling purity to <strong>95%+</strong> while reducing operational costs.</p>
                     </div>
-
                     <div class="content-card">
                         <div class="section-header">
                             <h3>User Experience</h3>
-                            <i data-lucide="user-check"></i>
+                            <i data-lucide="user" class="icon-green-circle"></i>
                         </div>
-                        <p>The user simply drops an item into the bin. The system creates a seamless "drop-and-go" experience, handling the complex sorting logic instantly.</p>
+                        <p class="card-text-sm">The user simply drops an item into the bin. The system creates a seamless "drop-and-go" experience.</p>
                     </div>
                 </div>
             </div>
@@ -207,6 +220,6 @@
         </main>
     </div>
 
-    <script src="main.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
