@@ -60,14 +60,13 @@ class SortacleUIPro:
     def __init__(self, confidence_threshold=0.50, display_fps=30.0, 
                  bin_id='bin_001', location='Brown University', 
                  enable_logging=True, db_path='sortacle_data.db',
-                 enable_servo=True, mock_servo=False, display_scale=1.0):
+                 enable_servo=True, mock_servo=False):
         self.latest_detections = []
         self.detection_lock = threading.Lock()
         self.inference_source = "none"
         self.inference_time_ms = 0
         self.confidence_threshold = confidence_threshold
         self.display_fps = display_fps
-        self.display_scale = display_scale  # Scale for display (0.5 = half size for better X11 performance)
         self.paused = False
         self.force_local = False
         self.show_settings = True
@@ -412,14 +411,6 @@ class SortacleUIPro:
                     self.frame_queue.put(frame.copy())
                 
                 display = self.draw_ui(frame)
-                
-                # Scale display for better X11 forwarding performance
-                if self.display_scale != 1.0:
-                    h, w = display.shape[:2]
-                    new_w = int(w * self.display_scale)
-                    new_h = int(h * self.display_scale)
-                    display = cv2.resize(display, (new_w, new_h), interpolation=cv2.INTER_AREA)
-                
                 cv2.imshow(win_name, display)
                 
                 key = cv2.waitKey(1) & 0xFF
@@ -486,8 +477,7 @@ if __name__ == "__main__":
     parser.add_argument('--db-path', type=str, default='sortacle_data.db', help='Database file path')
     parser.add_argument('--no-servo', action='store_true', help='Disable servo control')
     parser.add_argument('--mock-servo', action='store_true', help='Use mock servo (testing without hardware)')
-    parser.add_argument('--display-fps', type=float, default=30.0, help='Display FPS (lower for better X11 performance, e.g., 10)')
-    parser.add_argument('--display-scale', type=float, default=1.0, help='Display scale (0.5 for half size, better for X11)')
+    parser.add_argument('--display-fps', type=float, default=30.0, help='Display frame rate (lower = less network lag for X11)')
     
     args = parser.parse_args()
     
@@ -498,7 +488,6 @@ if __name__ == "__main__":
         db_path=args.db_path,
         enable_servo=not args.no_servo,
         mock_servo=args.mock_servo,
-        display_fps=args.display_fps,
-        display_scale=args.display_scale
+        display_fps=args.display_fps
     )
     ui.run()
