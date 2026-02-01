@@ -17,6 +17,14 @@ from cloud_inference import run_cloud_inference, CLOUD_ENDPOINT, test_cloud_conn
 from recyclability import is_recyclable
 from data_logger import DataLogger
 
+# Servo control imports
+try:
+    from servo.servo_move import get_kit, SERVO_CH
+    SERVO_AVAILABLE = True
+except ImportError:
+    print("⚠️  Servo module not available - servo control disabled")
+    SERVO_AVAILABLE = False
+
 # Color Palette (Modern/Elegant)
 ACCENT_GREEN = (120, 230, 100)  # Recyclable
 ACCENT_RED = (100, 100, 255)    # Trash (BGR)
@@ -51,7 +59,8 @@ def draw_filled_rounded_rect(img, pt1, pt2, color, r):
 class SortacleUIPro:
     def __init__(self, confidence_threshold=0.50, display_fps=30.0, 
                  bin_id='bin_001', location='Brown University', 
-                 enable_logging=True, db_path='sortacle_data.db'):
+                 enable_logging=True, db_path='sortacle_data.db',
+                 enable_servo=True, mock_servo=False):
         self.latest_detections = []
         self.detection_lock = threading.Lock()
         self.inference_source = "none"
@@ -74,6 +83,50 @@ class SortacleUIPro:
         self.logger = DataLogger(db_path) if enable_logging else None
         self.logged_count = 0
         self.last_logged_items = set()  # Track recently logged to avoid duplicates
+        
+        # Servo control
+        self.enable_servo = enable_servo and SERVO_AVAILABLE
+        self.servo_kit = None
+        if self.enable_servo:
+            try:
+                self.servo_kit = get_kit(mock=mock_servo)
+                # Initialize to center position (90°)
+                self.servo_kit.servo[SERVO_CH].angle = 90
+                time.sleep(0.5)
+                print("✅ Servo initialized at center position (90°)")
+            except Exception as e:
+                print(f"⚠️  Failed to initialize servo: {e}")
+                self.enable_servo = False
+
+    def move_servo_for_item(self, recyclable: bool):
+        """
+        Move servo to appropriate bin based on recyclability.
+        
+        Args:
+            recyclable: True for recyclable bin, False for trash bin
+        """
+        if not self.enable_servo or not self.servo_kit:
+            return
+        
+        try:
+            # Recyclable: rotate to 0° (inverted to 180°)
+            # Trash: rotate to 180° (inverted to 0°)
+            target_angle = 0 if recyclable else 180
+            actual_angle = 180 - target_angle  # Inverted as per servo_move.py
+            
+            self.servo_kit.servo[SERVO_CH].angle = actual_angle
+            bin_type = "♻️ RECYCLABLE" if recyclable else "🗑️ TRASH"
+            print(f"🔄 SERVO: Moving to {bin_type} bin (angle {target_angle}°)")
+            
+            # Wait for servo to complete movement
+            time.sleep(1.5)
+            
+            # Return to center position
+            self.servo_kit.servo[SERVO_CH].angle = 90
+            print(f"↩️  SERVO: Returned to center (90°)")
+            
+        except Exception as e:
+            print(f"⚠️  Servo movement error: {e}")
 
     def draw_glass_panel(self, frame, x1, y1, x2, y2, opacity=0.85):
         """Draw a semi-transparent 'glass' panel"""
@@ -238,6 +291,8 @@ class SortacleUIPro:
                     item_key = f"{best_detection['label']}_{int(time.time() / 5)}"
                     if item_key not in self.last_logged_items:
                         try:
+                            recyclable = is_recyclable(best_detection['label'])
+                            
                             self.logger.log_disposal(
                                 best_detection, 
                                 bin_id=self.bin_id,
@@ -250,7 +305,13 @@ class SortacleUIPro:
                             if len(self.last_logged_items) > 10:
                                 self.last_logged_items.pop()
                             
+                            recycle_icon = "♻️" if recyclable else "🗑️"
+                            print(f"📊 LOGGED: {best_detection['label']} ({best_detection.get('category', 'other')}) [{best_detection['confidence']:.0%}] - Recyclable: {recyclable} [ID: {self.logged_count}]")
                             print(f"[DATA] Logged to database (Total logged: {self.logged_count})")
+                            
+                            # Move servo to appropriate bin
+                            self.move_servo_for_item(recyclable)
+                            
                         except Exception as e:
                             print(f"[DATA ERROR] Failed to log: {e}")
                 
@@ -346,6 +407,8 @@ if __name__ == "__main__":
     parser.add_argument('--location', type=str, default='Brown University', help='Bin location')
     parser.add_argument('--no-logging', action='store_true', help='Disable data logging')
     parser.add_argument('--db-path', type=str, default='sortacle_data.db', help='Database file path')
+    parser.add_argument('--no-servo', action='store_true', help='Disable servo control')
+    parser.add_argument('--mock-servo', action='store_true', help='Use mock servo (testing without hardware)')
     
     args = parser.parse_args()
     
@@ -353,6 +416,8 @@ if __name__ == "__main__":
         bin_id=args.bin_id,
         location=args.location,
         enable_logging=not args.no_logging,
-        db_path=args.db_path
+        db_path=args.db_path,
+        enable_servo=not args.no_servo,
+        mock_servo=args.mock_servo
     )
     ui.run()
