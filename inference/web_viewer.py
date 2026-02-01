@@ -108,7 +108,7 @@ class SortacleWebViewer:
         self.location = location
         self.logger = DataLogger(db_path) if enable_logging else None
         self.last_detection_time = 0  # Timestamp of last detection
-        self.cooldown_seconds = 5  # Minimum time between detections
+        self.cooldown_seconds = 8  # Wait 8 seconds between new items (servo takes 3s to move)
         
         # Servo control
         self.enable_servo = enable_servo and SERVO_AVAILABLE
@@ -251,9 +251,9 @@ class SortacleWebViewer:
         # Convert RGB to BGR for OpenCV drawing
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         
-        # Only send every 5th frame to cloud to reduce server load
+        # Only send every 3rd frame to cloud to reduce server load (was every 5th)
         self.frame_counter += 1
-        if self.frame_counter % 5 == 0:
+        if self.frame_counter % 3 == 0:
             try:
                 self.frame_queue.put_nowait(frame.copy())
             except queue.Full:
