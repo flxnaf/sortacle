@@ -221,7 +221,7 @@ class SortacleWebViewer:
             
             # Simplified label: just "Recyclable" or "Non-recyclable"
             label_text = "♻️ RECYCLABLE" if recyclable else "🗑️ NON-RECYCLABLE"
-            color = (120, 230, 100) if recyclable else (100, 100, 255)  # BGR
+            color = (120, 230, 100) if recyclable else (80, 80, 255)  # BGR: green or bright red
             
             # Draw box
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 3)

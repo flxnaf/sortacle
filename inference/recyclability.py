@@ -11,10 +11,12 @@ RECYCLABILITY_TABLE = {
     "metal can": True,
     "soda can": True,
     "beer can": True,
+    "can": True,
     # Recyclable plastics
     "plastic bottle": True,
     "water bottle": True,
     "plastic container": True,
+    "bottle": True,
     # Recyclable glass
     "glass bottle": True,
     "glass jar": True,
@@ -23,16 +25,19 @@ RECYCLABILITY_TABLE = {
     "cardboard": True,
     "paper": True,
     "newspaper": True,
-    # Cups - assume recyclable for demo
-    "cup": True,
-    "plastic cup": True,
-    "paper cup": True,
-    "coffee cup": True,
     # Non-recyclable
     "plastic bag": False,
+    "bag": False,
+    "chip bag": False,
+    "snack bag": False,
+    "wrapper": False,
+    "package": False,
     "styrofoam": False,
+    "foam": False,
     "food waste": False,
     "food scraps": False,
+    "straw": False,
+    "utensils": False,
 }
 
 

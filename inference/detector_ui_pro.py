@@ -26,8 +26,8 @@ except ImportError:
     SERVO_AVAILABLE = False
 
 # Color Palette (Modern/Elegant)
-ACCENT_GREEN = (120, 230, 100)  # Recyclable
-ACCENT_RED = (100, 100, 255)    # Trash (BGR)
+ACCENT_GREEN = (120, 230, 100)  # Recyclable (BGR: green)
+ACCENT_RED = (80, 80, 255)      # Non-recyclable (BGR: bright red)
 ACCENT_BLUE = (255, 180, 80)    # UI Focus
 TEXT_WHITE = (245, 245, 245)
 
