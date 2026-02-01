@@ -116,9 +116,9 @@ class SortacleWebViewer:
         if self.enable_servo:
             try:
                 self.servo_kit = get_kit(mock=mock_servo)
-                self.servo_kit.servo[SERVO_CH].angle = 0
+                self.servo_kit.servo[SERVO_CH].angle = 90  # Center/closed at 90°
                 time.sleep(1.0)
-                print("✅ Servo initialized at center position (0°)")
+                print("✅ Servo initialized at center position (90°)")
             except Exception as e:
                 print(f"⚠️  Failed to initialize servo: {e}")
                 self.enable_servo = False
@@ -195,12 +195,12 @@ class SortacleWebViewer:
             return
         
         try:
-            # Direct to appropriate bin with different angles
+            # Direct to appropriate bin - start from 90° (center)
             if recyclable:
-                target_angle = 160  # Recyclable bin
+                target_angle = 180  # Recyclable bin (rotate right from center)
                 bin_type = "♻️ RECYCLABLE"
             else:
-                target_angle = 10   # Trash bin (opposite extreme from 160)
+                target_angle = 0    # Trash bin (rotate left from center)
                 bin_type = "🗑️ TRASH"
             
             self.servo_kit.servo[SERVO_CH].angle = target_angle
@@ -209,9 +209,9 @@ class SortacleWebViewer:
             # Wait for item to clear
             time.sleep(3.0)
             
-            # Close/reset to center
-            self.servo_kit.servo[SERVO_CH].angle = 0
-            print(f"↩️  SERVO: Closed")
+            # Return to center (90°)
+            self.servo_kit.servo[SERVO_CH].angle = 90
+            print(f"↩️  SERVO: Closed (90°)")
             
         except Exception as e:
             print(f"⚠️  Servo error: {e}")
@@ -273,11 +273,11 @@ class SortacleWebViewer:
         
         try:
             if action == 'open':
-                self.servo_kit.servo[SERVO_CH].angle = 90
+                self.servo_kit.servo[SERVO_CH].angle = 90  # Keep at center for manual
                 print("📂 WEB: Opening bins (90°)")
             elif action == 'close':
-                self.servo_kit.servo[SERVO_CH].angle = 0
-                print("⏹️  WEB: Closing bins (0°)")
+                self.servo_kit.servo[SERVO_CH].angle = 90  # Center position
+                print("⏹️  WEB: Closing bins (90°)")
             return True
         except Exception as e:
             print(f"⚠️  Servo control error: {e}")
