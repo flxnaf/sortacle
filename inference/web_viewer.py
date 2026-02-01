@@ -443,9 +443,9 @@ def get_stats():
         # Count recyclable vs non-recyclable
         cursor.execute("""
             SELECT 
-                SUM(CASE WHEN recyclable = 1 THEN 1 ELSE 0 END) as recyclable_count,
-                SUM(CASE WHEN recyclable = 0 THEN 1 ELSE 0 END) as non_recyclable_count
-            FROM disposals
+                SUM(CASE WHEN is_recyclable = 1 THEN 1 ELSE 0 END) as recyclable_count,
+                SUM(CASE WHEN is_recyclable = 0 THEN 1 ELSE 0 END) as non_recyclable_count
+            FROM disposal_events
         """)
         result = cursor.fetchone()
         conn.close()
