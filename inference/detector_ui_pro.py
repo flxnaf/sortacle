@@ -90,8 +90,11 @@ class SortacleUIPro:
         if self.enable_servo:
             try:
                 self.servo_kit = get_kit(mock=mock_servo)
-                # Initialize to center position (90°)
+                # Force reset to center position (90°) on startup
+                print("🔄 Resetting servo to center position...")
                 self.servo_kit.servo[SERVO_CH].angle = 90
+                time.sleep(1.0)  # Longer delay to ensure servo physically moves
+                self.servo_kit.servo[SERVO_CH].angle = 90  # Set again for reliability
                 time.sleep(0.5)
                 print("✅ Servo initialized at center position (90°)")
             except Exception as e:
