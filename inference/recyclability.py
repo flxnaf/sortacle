@@ -12,12 +12,14 @@ RECYCLABILITY_TABLE = {
     "cardboard box": True,
     "cardboard": True,
     "paper": True,
-    # Non-recyclable (adjusted for demo - cups are often not recyclable)
-    "cup": False,  # Disposable cups have plastic lining
+    # Non-recyclable
+    "cup": False,              # Disposable cups have plastic lining
     "plastic bag": False,
     "chip bag": False,
     "food package": False,
     "wrapper": False,
+    "plastic wrapper": False,
+    "food container": False,
     "styrofoam": False,
     "foam container": False,
     "straw": False,
@@ -26,18 +28,17 @@ RECYCLABILITY_TABLE = {
     "plastic utensil": False,
     "napkin": False,
     "tissue": False,
-    # Additional non-recyclable items
-    "banana": False,           # Food waste
-    "apple": False,            # Food waste
-    "orange": False,           # Food waste
-    "phone": False,            # Electronics (e-waste)
-    "pen": False,              # Mixed materials
-    "pencil": False,           # Mixed materials
-    "battery": False,          # Hazardous waste
-    "light bulb": False,       # Hazardous waste
-    "toy": False,              # Mixed materials
-    "plastic wrapper": False,  # Non-recyclable plastic
-    "food container": False,   # Often contaminated
+    # Food waste
+    "banana": False,
+    "apple": False,
+    "orange": False,
+    # Electronics/Hazardous
+    "phone": False,
+    "battery": False,
+    "light bulb": False,
+    "pen": False,
+    "pencil": False,
+    "toy": False,
 }
 
 
