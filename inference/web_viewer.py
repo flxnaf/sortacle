@@ -136,16 +136,24 @@ class SortacleWebViewer:
             try:
                 frame = self.frame_queue.get(timeout=1.0)
                 
-                # Run cloud inference
-                detections = run_cloud_inference(frame, self.confidence_threshold)
+                # Run cloud inference (no confidence threshold - handled server-side)
+                detections = run_cloud_inference(frame)
+                
+                # Filter by confidence threshold locally
+                if 'detections' in detections:
+                    filtered = [
+                        det for det in detections['detections']
+                        if det.get('confidence', 0) >= self.confidence_threshold
+                    ]
+                    detections['detections'] = filtered
                 
                 # Update latest detections
                 with self.detection_lock:
-                    self.latest_detections = detections
+                    self.latest_detections = detections.get('detections', [])
                 
                 # Log and trigger servo if needed
-                if detections:
-                    best_detection = max(detections, key=lambda x: x['confidence'])
+                if self.latest_detections:
+                    best_detection = max(self.latest_detections, key=lambda x: x['confidence'])
                     item_key = best_detection['label'].lower()
                     
                     if item_key not in self.last_logged_items:
