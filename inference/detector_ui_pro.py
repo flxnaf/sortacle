@@ -277,13 +277,15 @@ class SortacleUIPro:
             
             rec = is_recyclable(d["label"])
             color = ACCENT_GREEN if rec else ACCENT_RED
-            cv2.rectangle(display_frame, (x1, y1), (x2, y2), color, 2, cv2.LINE_AA)
+            cv2.rectangle(display_frame, (x1, y1), (x2, y2), color, 3, cv2.LINE_AA)
             
-            lbl = f"{'RECYCLE' if rec else 'TRASH'} | {d['label'].upper()}"
-            (tw, th), _ = cv2.getTextSize(lbl, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
-            tag_y1 = max(0, y1 - 25)
-            draw_filled_rounded_rect(display_frame, (x1, tag_y1), (x1 + tw + 20, tag_y1 + 25), color, 5)
-            cv2.putText(display_frame, lbl, (x1 + 10, tag_y1 + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv2.LINE_AA)
+            # Simplified label: just RECYCLABLE or NON-RECYCLABLE
+            lbl = "♻️ RECYCLABLE" if rec else "🗑️ NON-RECYCLABLE"
+            conf_pct = f"{d['confidence']*100:.0f}%"
+            (tw, th), _ = cv2.getTextSize(f"{lbl} {conf_pct}", cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+            tag_y1 = max(0, y1 - 30)
+            draw_filled_rounded_rect(display_frame, (x1, tag_y1), (x1 + tw + 25, tag_y1 + 30), color, 6)
+            cv2.putText(display_frame, f"{lbl} {conf_pct}", (x1 + 12, tag_y1 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 
         return display_frame
 
@@ -358,8 +360,15 @@ class SortacleUIPro:
                         try:
                             recyclable = is_recyclable(best_detection['label'])
                             
+                            # Create simplified detection for database
+                            simplified_detection = {
+                                'label': 'recyclable' if recyclable else 'non-recyclable',
+                                'confidence': best_detection['confidence'],
+                                'recyclable': recyclable
+                            }
+                            
                             self.logger.log_disposal(
-                                best_detection, 
+                                simplified_detection, 
                                 bin_id=self.bin_id,
                                 location=self.location
                             )

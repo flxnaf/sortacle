@@ -160,9 +160,9 @@ class SortacleWebViewer:
                         recyclable = is_recyclable(best_detection['label'])
                         
                         if self.enable_logging and self.logger:
-                            # Create detection dict for logging
+                            # Create simplified detection dict for logging
                             detection_dict = {
-                                'label': best_detection['label'],
+                                'label': 'recyclable' if recyclable else 'non-recyclable',
                                 'confidence': best_detection['confidence'],
                                 'recyclable': recyclable
                             }
@@ -216,21 +216,22 @@ class SortacleWebViewer:
         
         for det in detections:
             x1, y1, x2, y2 = map(int, det['bbox'])
-            label = det['label']
             conf = det['confidence']
-            recyclable = is_recyclable(label)
+            recyclable = is_recyclable(det['label'])
             
+            # Simplified label: just "Recyclable" or "Non-recyclable"
+            label_text = "♻️ RECYCLABLE" if recyclable else "🗑️ NON-RECYCLABLE"
             color = (120, 230, 100) if recyclable else (100, 100, 255)  # BGR
             
             # Draw box
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 3)
             
             # Draw label background
-            label_text = f"{label} {conf:.0%}"
-            (text_w, text_h), _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-            cv2.rectangle(frame, (x1, y1 - text_h - 10), (x1 + text_w + 10, y1), color, -1)
-            cv2.putText(frame, label_text, (x1 + 5, y1 - 5), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+            display_text = f"{label_text} {conf:.0%}"
+            (text_w, text_h), _ = cv2.getTextSize(display_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+            cv2.rectangle(frame, (x1, y1 - text_h - 15), (x1 + text_w + 15, y1), color, -1)
+            cv2.putText(frame, display_text, (x1 + 7, y1 - 7), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
         
         return frame
     
