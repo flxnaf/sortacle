@@ -203,6 +203,58 @@ body {
   display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15);
   padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
 }
+
+/* Live Statistics */
+.live-stats-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin: 32px 0;
+}
+
+.live-stat-box {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.live-stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-number {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1;
+  color: white;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+  font-weight: 500;
+  margin-top: 4px;
+}
 .dot-pulse { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; }
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }

@@ -197,4 +197,48 @@ if (mapElement) {
         });
     }
     
+    // 6. LIVE STATISTICS UPDATE
+    function updateLiveStats() {
+        fetch('http://172.20.10.4:5000/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Stats error:', data.error);
+                    return;
+                }
+                
+                // Update counters with animation
+                animateValue('recyclable-count', parseInt(document.getElementById('recyclable-count').textContent) || 0, data.recyclable, 500);
+                animateValue('non-recyclable-count', parseInt(document.getElementById('non-recyclable-count').textContent) || 0, data.non_recyclable, 500);
+                animateValue('total-count', parseInt(document.getElementById('total-count').textContent) || 0, data.total, 500);
+            })
+            .catch(error => {
+                console.error('Failed to fetch stats:', error);
+            });
+    }
+    
+    // Animate number changes
+    function animateValue(id, start, end, duration) {
+        const element = document.getElementById(id);
+        if (!element || start === end) return;
+        
+        const range = end - start;
+        const increment = range / (duration / 16); // 60fps
+        let current = start;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                element.textContent = end;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.round(current);
+            }
+        }, 16);
+    }
+    
+    // Update stats every 2 seconds
+    updateLiveStats(); // Initial load
+    setInterval(updateLiveStats, 2000);
+    
 });

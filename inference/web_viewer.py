@@ -317,6 +317,40 @@ def servo_control(action):
         return {'status': 'ok'}
     return {'status': 'error'}, 500
 
+@app.route('/stats')
+def get_stats():
+    """Get disposal statistics from database"""
+    try:
+        if not viewer.logger:
+            return {'error': 'Database not available'}, 500
+        
+        # Query database for counts
+        import sqlite3
+        conn = sqlite3.connect(viewer.logger.db_path)
+        cursor = conn.cursor()
+        
+        # Count recyclable vs non-recyclable
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN recyclable = 1 THEN 1 ELSE 0 END) as recyclable_count,
+                SUM(CASE WHEN recyclable = 0 THEN 1 ELSE 0 END) as non_recyclable_count
+            FROM disposals
+        """)
+        result = cursor.fetchone()
+        conn.close()
+        
+        recyclable = result[0] if result[0] else 0
+        non_recyclable = result[1] if result[1] else 0
+        
+        return {
+            'recyclable': recyclable,
+            'non_recyclable': non_recyclable,
+            'total': recyclable + non_recyclable
+        }
+    except Exception as e:
+        print(f"⚠️  Stats error: {e}")
+        return {'error': str(e)}, 500
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Sortacle Web Viewer')
     parser.add_argument('--bin-id', type=str, default='bin_001', help='Unique bin identifier')
