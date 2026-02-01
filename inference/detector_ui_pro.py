@@ -397,8 +397,11 @@ class SortacleUIPro:
         
         win_name = "Sortacle - Vision AI Pro"
         cv2.namedWindow(win_name, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
-        cv2.resizeWindow(win_name, 960, 640)  # Better size for X11 forwarding
+        cv2.resizeWindow(win_name, 640, 480)  # Smaller window for faster X11 forwarding
         cv2.setMouseCallback(win_name, self.mouse_callback)
+        
+        last_display_time = 0
+        display_interval = 1.0 / self.display_fps
         
         try:
             while self.running:
@@ -407,11 +410,16 @@ class SortacleUIPro:
                 if frame is None: continue
                 
                 self.frame_count += 1
+                # Always process frames for inference (full speed)
                 if not self.paused and not self.frame_queue.full():
                     self.frame_queue.put(frame.copy())
                 
-                display = self.draw_ui(frame)
-                cv2.imshow(win_name, display)
+                # Only update display at display_fps rate (for X11 efficiency)
+                time_since_display = start - last_display_time
+                if time_since_display >= display_interval:
+                    display = self.draw_ui(frame)
+                    cv2.imshow(win_name, display)
+                    last_display_time = start
                 
                 key = cv2.waitKey(1) & 0xFF
                 
@@ -477,6 +485,7 @@ if __name__ == "__main__":
     parser.add_argument('--db-path', type=str, default='sortacle_data.db', help='Database file path')
     parser.add_argument('--no-servo', action='store_true', help='Disable servo control')
     parser.add_argument('--mock-servo', action='store_true', help='Use mock servo (testing without hardware)')
+    parser.add_argument('--display-fps', type=float, default=30.0, help='Display FPS for X11 forwarding (default: 30, try 10 for remote)')
     
     args = parser.parse_args()
     
@@ -486,6 +495,7 @@ if __name__ == "__main__":
         enable_logging=not args.no_logging,
         db_path=args.db_path,
         enable_servo=not args.no_servo,
-        mock_servo=args.mock_servo
+        mock_servo=args.mock_servo,
+        display_fps=args.display_fps
     )
     ui.run()
