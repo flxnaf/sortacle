@@ -90,13 +90,13 @@ class SortacleUIPro:
         if self.enable_servo:
             try:
                 self.servo_kit = get_kit(mock=mock_servo)
-                # Force reset to center position (90°) on startup
+                # Force reset to center position (100°) on startup
                 print("🔄 Resetting servo to center position...")
-                self.servo_kit.servo[SERVO_CH].angle = 90
+                self.servo_kit.servo[SERVO_CH].angle = 100
                 time.sleep(1.0)  # Longer delay to ensure servo physically moves
-                self.servo_kit.servo[SERVO_CH].angle = 90  # Set again for reliability
+                self.servo_kit.servo[SERVO_CH].angle = 100  # Set again for reliability
                 time.sleep(0.5)
-                print("✅ Servo initialized at center position (90°)")
+                print("✅ Servo initialized at center position (100°)")
             except Exception as e:
                 print(f"⚠️  Failed to initialize servo: {e}")
                 self.enable_servo = False
@@ -114,8 +114,8 @@ class SortacleUIPro:
         
         try:
             # 0. Reset to center position first (in case servo is already rotated)
-            self.servo_kit.servo[SERVO_CH].angle = 90
-            print(f"🔄 SERVO: Resetting to center (90°)")
+            self.servo_kit.servo[SERVO_CH].angle = 100
+            print(f"🔄 SERVO: Resetting to center (100°)")
             time.sleep(0.5)  # Brief pause to ensure reset completes
             
             # 1. Open the appropriate bin
@@ -165,14 +165,14 @@ class SortacleUIPro:
                 print(f"⚠️  SERVO: Timeout waiting for item to clear (waited {waited:.1f}s)")
             
             # 4. Close the bin (return to center)
-            self.servo_kit.servo[SERVO_CH].angle = 90
-            print(f"↩️  SERVO: Closed - ready for next item (90°)")
+            self.servo_kit.servo[SERVO_CH].angle = 100
+            print(f"↩️  SERVO: Closed - ready for next item (100°)")
             
         except Exception as e:
             print(f"⚠️  Servo movement error: {e}")
             # Emergency: return to center position
             try:
-                self.servo_kit.servo[SERVO_CH].angle = 90
+                self.servo_kit.servo[SERVO_CH].angle = 100
             except:
                 pass
 
@@ -385,6 +385,10 @@ class SortacleUIPro:
         print("="*70)
         print("Press 'Q' or click red X to quit")
         print("Press 'S' to toggle settings | SPACE to pause")
+        print("Manual Servo Control:")
+        print("  'R' = Open Recyclable bin (0°)")
+        print("  'T' = Open Trash bin (180°)")
+        print("  'C' = Close/Center bin (100°)")
         print("="*70 + "\n")
         
         self.camera = Camera()
@@ -422,8 +426,24 @@ class SortacleUIPro:
                 if key == ord('q'):
                     print("\nQuitting...")
                     break
-                elif key == ord(' '): self.paused = not self.paused
-                elif key == ord('s'): self.show_settings = not self.show_settings
+                elif key == ord(' '): 
+                    self.paused = not self.paused
+                elif key == ord('s'): 
+                    self.show_settings = not self.show_settings
+                
+                # Manual servo controls (for demo)
+                elif key == ord('r'):  # R = Open Recyclable bin
+                    if self.enable_servo and self.servo_kit:
+                        print("🔵 MANUAL: Opening RECYCLABLE bin (0°)")
+                        self.servo_kit.servo[SERVO_CH].angle = 180  # Inverted
+                elif key == ord('t'):  # T = Open Trash bin
+                    if self.enable_servo and self.servo_kit:
+                        print("🔴 MANUAL: Opening TRASH bin (180°)")
+                        self.servo_kit.servo[SERVO_CH].angle = 0  # Inverted
+                elif key == ord('c'):  # C = Close/Center
+                    if self.enable_servo and self.servo_kit:
+                        print("⏹️  MANUAL: Closing bin (100°)")
+                        self.servo_kit.servo[SERVO_CH].angle = 100
                 
                 elapsed = time.time() - start
                 time.sleep(max(0, (1.0/self.display_fps) - elapsed))
