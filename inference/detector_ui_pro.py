@@ -109,35 +109,35 @@ class SortacleUIPro:
 
         # Settings Panel
         if self.show_settings:
-            p_w = 280
-            p_x = w - p_w - 20
-            self.draw_glass_panel(display_frame, p_x, 95, w - 20, h - 20, 0.9)
+            p_w = 220  # Narrower panel
+            p_x = w - p_w - 15
+            self.draw_glass_panel(display_frame, p_x, 90, w - 15, h - 15, 0.9)
             
-            y = 135
-            cv2.putText(display_frame, "CONFIDENCE", (p_x + 20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (180, 180, 180), 1, cv2.LINE_AA)
-            y += 25
-            cv2.line(display_frame, (p_x + 20, y), (p_x + 240, y), (80, 80, 80), 2)
-            s_pos = int(p_x + 20 + 220 * self.confidence_threshold)
-            cv2.circle(display_frame, (s_pos, y), 8, ACCENT_BLUE, -1)
-            cv2.putText(display_frame, f"{self.confidence_threshold:.0%}", (p_x + 210, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1)
+            y = 120
+            cv2.putText(display_frame, "CONFIDENCE", (p_x + 15, y), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (180, 180, 180), 1, cv2.LINE_AA)
+            y += 20
+            cv2.line(display_frame, (p_x + 15, y), (p_x + 195, y), (80, 80, 80), 2)
+            s_pos = int(p_x + 15 + 180 * self.confidence_threshold)
+            cv2.circle(display_frame, (s_pos, y), 6, ACCENT_BLUE, -1)
+            cv2.putText(display_frame, f"{self.confidence_threshold:.0%}", (p_x + 170, y - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.35, TEXT_WHITE, 1)
             
-            y += 50
-            btn_h = 35
+            y += 40
+            btn_h = 30
             p_color = (60, 150, 60) if self.paused else (60, 60, 150)
-            draw_filled_rounded_rect(display_frame, (p_x + 20, y), (p_x + 240, y + btn_h), p_color, 8)
-            label = "RESUME DETECTION" if self.paused else "PAUSE DETECTION"
-            cv2.putText(display_frame, label, (p_x + 55, y + 23), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_WHITE, 1, cv2.LINE_AA)
+            draw_filled_rounded_rect(display_frame, (p_x + 15, y), (p_x + 195, y + btn_h), p_color, 6)
+            label = "RESUME" if self.paused else "PAUSE"
+            cv2.putText(display_frame, label, (p_x + 75, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1, cv2.LINE_AA)
             
-            y += 55
+            y += 45
             l_color = (150, 100, 30) if self.force_local else (60, 60, 60)
-            draw_filled_rounded_rect(display_frame, (p_x + 20, y), (p_x + 240, y + btn_h), l_color, 8)
-            cv2.putText(display_frame, "FORCE LOCAL AI", (p_x + 70, y + 23), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_WHITE, 1, cv2.LINE_AA)
+            draw_filled_rounded_rect(display_frame, (p_x + 15, y), (p_x + 195, y + btn_h), l_color, 6)
+            cv2.putText(display_frame, "LOCAL AI", (p_x + 65, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, TEXT_WHITE, 1, cv2.LINE_AA)
             
-            y = h - 80
-            cv2.putText(display_frame, f"Frames: {self.frame_count}", (p_x + 20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
-            cv2.putText(display_frame, f"Detections: {self.detection_count}", (p_x + 20, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
+            y = h - 75
+            cv2.putText(display_frame, f"Frames: {self.frame_count}", (p_x + 15, y), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (120, 120, 120), 1)
+            cv2.putText(display_frame, f"Detections: {self.detection_count}", (p_x + 15, y + 18), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (120, 120, 120), 1)
             if self.enable_logging:
-                cv2.putText(display_frame, f"Logged: {self.logged_count}", (p_x + 20, y + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, ACCENT_GREEN, 1)
+                cv2.putText(display_frame, f"Logged: {self.logged_count}", (p_x + 15, y + 36), cv2.FONT_HERSHEY_SIMPLEX, 0.35, ACCENT_GREEN, 1)
         else:
             cv2.putText(display_frame, "Press 'S' for Settings", (w - 180, h - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1, cv2.LINE_AA)
 
@@ -283,8 +283,8 @@ class SortacleUIPro:
         inf_thread.start()
         
         win_name = "Sortacle - Vision AI Pro"
-        cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(win_name, 1280, 720)
+        cv2.namedWindow(win_name, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow(win_name, 960, 640)  # Better size for X11 forwarding
         cv2.setMouseCallback(win_name, self.mouse_callback)
         
         try:
