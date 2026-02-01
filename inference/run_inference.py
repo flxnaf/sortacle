@@ -1,62 +1,39 @@
 """
 Inference Logic
-Contains the core computer vision inference function
-Currently returns mock predictions - will integrate real model later
+Uses YOLO-World for open-vocabulary waste detection
 """
 
 import numpy as np
 from PIL import Image
+from model import model, format_detections
 
 
 def run_inference(image: Image.Image) -> dict:
     """
-    Run computer vision inference on an image
+    Run YOLO-World inference on an image
     
     Args:
         image: PIL Image object (already resized to 640x640)
     
     Returns:
         dict with predictions containing:
-            - bounding_boxes: list of [x1, y1, x2, y2] coordinates
-            - labels: list of detected object class names
-            - confidence_scores: list of confidence values (0-1)
-    
-    TODO: Replace mock data with real model inference
-    Integration points for real model:
-        1. Load model weights (YOLO, Faster R-CNN, etc.)
-        2. Preprocess image (normalize, convert to tensor)
-        3. Run forward pass
-        4. Post-process detections (NMS, threshold filtering)
-        5. Format output
+            - detections: list of detected objects with bbox, label, confidence
+            - model: model name
+            - inference_time_ms: inference time in milliseconds
     """
     
-    # Convert image to numpy array for processing
+    # Convert PIL Image to numpy array for YOLO
     img_array = np.array(image)
     
-    # MOCK PREDICTIONS
-    # Replace this with actual model inference
-    predictions = {
-        "image_size": img_array.shape,
-        "detections": [
-            {
-                "bbox": [100, 150, 300, 400],  # [x1, y1, x2, y2]
-                "label": "object_1",
-                "confidence": 0.92
-            },
-            {
-                "bbox": [350, 200, 500, 450],
-                "label": "object_2",
-                "confidence": 0.87
-            },
-            {
-                "bbox": [50, 50, 200, 200],
-                "label": "object_3",
-                "confidence": 0.78
-            }
-        ],
-        "model": "mock_detector_v1",
-        "inference_time_ms": 45.2
-    }
+    # Run YOLO-World inference with custom waste categories
+    # Using 25% confidence since open-vocabulary models can be less confident
+    results = model(img_array, verbose=False, conf=0.25)
+    
+    # Convert to standardized format
+    predictions = format_detections(results)
+    
+    # Add image size info
+    predictions["image_size"] = img_array.shape
     
     return predictions
 
