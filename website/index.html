@@ -1,195 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sortacle</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortacle | Smart Waste Network</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div class="app-container">
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <a href="#" class="logo">
-        <div class="logo-icon">
-          <i data-lucide="sprout" size="24"></i>
-        </div>
-        <h1>Sortacle</h1>
-      </a>
 
-      <ul class="nav-links">
-        <li class="nav-item active" data-tab="overview">
-          <i data-lucide="layout-grid"></i>
-          <span>Overview</span>
-        </li>
-        <li class="nav-item" data-tab="heatmaps">
-          <i data-lucide="map"></i>
-          <span>Heatmaps</span>
-        </li>
-        <li class="nav-item" data-tab="dashboards">
-          <i data-lucide="activity"></i>
-          <span>Real-time</span>
-        </li>
-        <li class="nav-item" data-tab="sponsor">
-          <i data-lucide="award"></i>
-          <span>Sponsors</span>
-        </li>
-      </ul>
-
-      <div class="sidebar-bottom">
-        <div class="nav-item">
-          <i data-lucide="settings"></i>
-          <span>Settings</span>
-        </div>
-        <div class="nav-item">
-          <i data-lucide="help-circle"></i>
-          <span>Support</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Dashboard Content -->
-    <main class="main-content">
-      <header>
-        <div class="header-title">
-          <h2 id="current-tab-title">Project Overview</h2>
-        </div>
-        <div class="user-actions">
-          <div class="btn-icon"><i data-lucide="search" size="20"></i></div>
-          <div class="btn-icon"><i data-lucide="bell" size="20"></i></div>
-          <div class="btn-icon btn-primary">
-            <i data-lucide="plus" size="20"></i>
-          </div>
-        </div>
-      </header>
-
-      <!-- Overview Section -->
-      <div id="overview" class="tab-pane active">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="package-check"></i></div>
-            <div class="stat-value">142,890</div>
-            <div class="stat-label">Units Sorted Today</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-orange"><i data-lucide="leaf"></i></div>
-            <div class="stat-value">28.4</div>
-            <div class="stat-label">Plastic Diverted (Tons)</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-blue"><i data-lucide="zap"></i></div>
-            <div class="stat-value">99.8%</div>
-            <div class="stat-label">Model Precision</div>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <div class="section-header">
-            <h3>Sustainability Trajectory</h3>
-            <div class="section-badges">
-              <span class="pill">+12.4% vs Last Month</span>
+    <div class="app-container">
+        
+        <nav class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="recycle" color="white" size="24"></i>
+                </div>
+                <span class="logo-text">Sortacle</span>
             </div>
-          </div>
-          <div class="placeholder-visual">
-            <i data-lucide="line-chart" size="80"></i>
-            <p class="placeholder-text">Inference impact data streaming live</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Heatmaps Section -->
-      <div id="heatmaps" class="tab-pane">
-        <div class="content-card">
-          <div class="section-header">
-            <h3>Geospatial Waste Density</h3>
-            <p class="section-sub">
-              Mapping the flow of materials through our global inference network.
-            </p>
-          </div>
-          <div class="placeholder-visual visual-wide">
-            <i data-lucide="globe" size="80"></i>
-            <p class="placeholder-wide-title">Interactive Geospatial Component</p>
-            <span class="placeholder-wide-sub">Ready for Mapbox GL JS Integration</span>
-          </div>
-        </div>
-      </div>
+            <ul class="nav-tabs">
+                <li class="nav-item active" data-tab="overview">
+                    <i data-lucide="home"></i> <span>Overview</span>
+                </li>
+                <li class="nav-item" data-tab="dashboards">
+                    <i data-lucide="activity"></i> <span>Live Network</span>
+                </li>
+                <li class="nav-item" data-tab="heatmaps">
+                    <i data-lucide="map"></i> <span>Heatmaps</span>
+                </li>
+            </ul>
 
-      <!-- Real-time Section -->
-      <div id="dashboards" class="tab-pane">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="timer"></i></div>
-            <div class="stat-value">32ms</div>
-            <div class="stat-label">End-to-End Latency</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="database"></i></div>
-            <div class="stat-value">842 GB</div>
-            <div class="stat-label">Telemetry Ingested</div>
-          </div>
-        </div>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot"></span> System Online
+                </div>
+                <p>Providence, RI</p>
+            </div>
+        </nav>
 
-        <div class="content-card">
-          <div class="section-header">
-            <h3>Inference Stream Analysis</h3>
-          </div>
-          <div class="placeholder-visual">
-            <i data-lucide="radio" size="80"></i>
-            <p class="placeholder-wide-title">Real-time WebSocket Stream</p>
-          </div>
-        </div>
-      </div>
+        <main class="main-content">
+            
+            <div class="glass-header">
+                <div>
+                    <h2 id="current-tab-title">Project Overview</h2>
+                    <p>Real-time telemetry and waste analytics.</p>
+                </div>
+                <div class="status-badge">
+                    LIVE FEED
+                </div>
+            </div>
 
-      <!-- Sponsor Section -->
-      <div id="sponsor" class="tab-pane">
-        <div class="impact-banner">
-          <h3>Impact Reporting</h3>
-          <p>
-            Transparent ESG metrics for our strategic partners. Together, we've reduced
-            global landfill contributions by 4% this quarter.
-          </p>
-        </div>
+            <div id="overview" class="tab-pane active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>Waste Sorting, Reimagined.</h1>
+                        <p>Sortacle uses AI to identify and sort waste at the source.</p>
+                    </div>
+                </div>
 
-        <div class="partner-grid">
-          <div class="partner-card">
-            <div class="partner-logo"><i data-lucide="mountain" size="28"></i></div>
-            <h4 class="partner-title">Peak Ecology</h4>
-            <p class="partner-sub">Principal Research Partner</p>
-          </div>
-          <div class="partner-card">
-            <div class="partner-logo"><i data-lucide="wind" size="28"></i></div>
-            <h4 class="partner-title">AeroCycle</h4>
-            <p class="partner-sub">Logistics & Infrastructure</p>
-          </div>
-          <div class="partner-card">
-            <div class="partner-logo"><i data-lucide="sun" size="28"></i></div>
-            <h4 class="partner-title">SolarPath</h4>
-            <p class="partner-sub">Clean Energy Provider</p>
-          </div>
-        </div>
-      </div>
+                <div class="content-card">
+                    <div class="section-header">
+                        <h3>Sustainability Trajectory</h3>
+                    </div>
+                    <div style="height: 300px; width: 100%;">
+                        <canvas id="trajectoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-      <footer>
-        <p>&copy; 2026 Sortacle. Built for a Greener Planet.</p>
-      </footer>
-    </main>
-  </div>
+            <div id="dashboards" class="tab-pane">
+                
+                <div class="counter-card">
+                    <h3>Total Items Diverted</h3>
+                    <div id="live-counter">0</div>
+                    <p>Items processed today</p>
+                </div>
 
-  <!-- JS -->
-  <script src="main.js"></script>
+                <div class="stats-grid">
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>Real-Time Impact</h3>
+                            <i data-lucide="sprout"></i>
+                        </div>
+                        <div class="impact-list">
+                            <div class="impact-row">
+                                <span>Trees Saved</span>
+                                <strong id="impact-trees">0</strong>
+                            </div>
+                            <div class="impact-row">
+                                <span>Energy (kWh)</span>
+                                <strong id="impact-energy">0</strong>
+                            </div>
+                            <div class="impact-row">
+                                <span>CO2 Avoided (kg)</span>
+                                <strong id="impact-co2">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="section-header">
+                            <h3>Composition</h3>
+                        </div>
+                        <div style="height: 200px;">
+                            <canvas id="compositionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="chart-header-row">
+                        <h3>Sorting History</h3>
+                        
+                        <div class="calendar-controls">
+                            <button id="prevWeek">←</button>
+                            <span id="dateRangeLabel">Loading...</span>
+                            <button id="nextWeek">→</button>
+                            <div style="position: relative; display: inline-block;">
+                                <input type="month" id="monthPicker" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                                <button>📅</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="heatmaps" class="tab-pane">
+                <div class="content-card" style="height: 600px; padding: 0; overflow: hidden; position: relative;">
+                    <div id="map" style="width: 100%; height: 100%;"></div>
+                    
+                    <div class="map-legend">
+                        <h4>Network Density</h4>
+                        <div class="legend-gradient"></div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                            <span>Low</span><span>High</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="main.js"></script>
 </body>
 </html>
