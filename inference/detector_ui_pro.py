@@ -110,6 +110,11 @@ class SortacleUIPro:
             return
         
         try:
+            # 0. Reset to center position first (in case servo is already rotated)
+            self.servo_kit.servo[SERVO_CH].angle = 90
+            print(f"🔄 SERVO: Resetting to center (90°)")
+            time.sleep(0.5)  # Brief pause to ensure reset completes
+            
             # 1. Open the appropriate bin
             target_angle = 0 if recyclable else 180
             actual_angle = 180 - target_angle  # Inverted as per servo_move.py
