@@ -57,6 +57,15 @@ build/
 .env.local
 .env.*.local
 
+# SSH commands with IPs/passwords (personal reference)
+SSH_COMMANDS.md
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
 # Model files (often large)
 *.pth
 *.pt
