@@ -44,14 +44,15 @@ source ../venv/bin/activate
 pip install -r servorequirements.txt
 # Enable I2C on Raspberry Pi (raspi-config) and verify with:
 i2cdetect -y 1  # look for device at 0x40
-python calibrate.py   # exercise raw angles
-python servo_move.py  # interactive control (enter 0-180 or q to quit)
+python calibrate.py   # exercise raw angles (supports --mock when hardware is absent)
+python servo_move.py  # interactive control (enter 0-180 or q to quit) — supports --mock
 ```
 
 Notes:
 
 - `calibrate.py` writes raw angles (0–180) to the servo. Use this to find orientation.
 - `servo_move.py` inverts the input angle before setting the servo (`actual_angle = 180 - angle`).
+- Both scripts accept `--mock` to run without I²C hardware (useful for development or CI).
 - Hardware deps were moved to `servo/servorequirements.txt` so the main `inference/requirements.txt` remains cloud-friendly.
 
 ### 3. Test the API
