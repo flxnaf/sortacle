@@ -197,10 +197,10 @@ class SortacleWebViewer:
         try:
             # Direct to appropriate bin with different angles
             if recyclable:
-                target_angle = 160  # Recyclable bin (CORRECT - don't change)
+                target_angle = 160  # Recyclable bin
                 bin_type = "♻️ RECYCLABLE"
             else:
-                target_angle = 20   # Trash bin (opposite direction from 160)
+                target_angle = -160  # Trash bin (opposite direction)
                 bin_type = "🗑️ TRASH"
             
             self.servo_kit.servo[SERVO_CH].angle = target_angle
