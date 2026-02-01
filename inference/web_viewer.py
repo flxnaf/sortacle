@@ -224,9 +224,12 @@ class SortacleWebViewer:
     
     def get_frame(self):
         """Get latest frame with detections drawn"""
-        frame = self.camera.read()
+        frame = self.camera.capture_frame()
         if frame is None:
             return None
+        
+        # Convert RGB to BGR for OpenCV drawing
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         
         # Queue frame for inference (non-blocking)
         try:
