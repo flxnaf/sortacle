@@ -264,7 +264,7 @@ class SortacleWebViewer:
                 with self.detection_lock:
                     self.latest_detections = detections.get('detections', [])
                 
-                # Log and trigger servo if needed
+                # Process detection and trigger servo/logging
                 if self.latest_detections:
                     current_time = time.time()
                     
@@ -275,22 +275,19 @@ class SortacleWebViewer:
                     best_detection = max(self.latest_detections, key=lambda x: x['confidence'])
                     recyclable = is_recyclable(best_detection['label'])
                     
-                    # Log detection
-                    if self.enable_logging and self.logger:
-                        detection_dict = {
-                            'label': 'recyclable' if recyclable else 'non-recyclable',
-                            'confidence': best_detection['confidence'],
-                            'recyclable': recyclable
-                        }
-                        self.logger.log_disposal(
-                            detection=detection_dict,
-                            bin_id=self.bin_id,
-                            location=self.location
-                        )
-                    
-                    # Trigger servo
+                    # Only log and move servo if servo is enabled
+                    # This ensures we only count items that were actually sorted
                     if self.enable_servo:
+                        # Move servo first
                         self.move_servo_for_item(recyclable, best_detection['label'])
+                        
+                        # Log detection AFTER successful servo movement
+                        if self.enable_logging and self.logger:
+                            self.logger.log_disposal(
+                                detection=best_detection,
+                                bin_id=self.bin_id,
+                                location=self.location
+                            )
                     
                     # Update last detection time
                     self.last_detection_time = current_time
