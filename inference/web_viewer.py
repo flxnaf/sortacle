@@ -77,9 +77,8 @@ HTML_TEMPLATE = """
     <div class="info">Real-time object detection and sorting</div>
     <img src="{{ url_for('video_feed') }}" />
     <div class="controls">
-        <button class="recyclable" onclick="fetch('/servo/recyclable')">♻️ Open Recyclable</button>
-        <button class="trash" onclick="fetch('/servo/trash')">🗑️ Open Trash</button>
-        <button class="center" onclick="fetch('/servo/center')">⏹️ Close/Center</button>
+        <button class="recyclable" onclick="fetch('/servo/open')">📂 Open Bins</button>
+        <button class="center" onclick="fetch('/servo/close')">⏹️ Close Bins</button>
     </div>
 </body>
 </html>
@@ -248,15 +247,12 @@ class SortacleWebViewer:
             return False
         
         try:
-            if action == 'recyclable':
-                self.servo_kit.servo[SERVO_CH].angle = 80
-                print("🔵 WEB: Opening RECYCLABLE bin")
-            elif action == 'trash':
-                self.servo_kit.servo[SERVO_CH].angle = 160
-                print("🔴 WEB: Opening TRASH bin")
-            elif action == 'center':
+            if action == 'open':
+                self.servo_kit.servo[SERVO_CH].angle = 90
+                print("📂 WEB: Opening bins (90°)")
+            elif action == 'close':
                 self.servo_kit.servo[SERVO_CH].angle = 0
-                print("⏹️  WEB: Closing bin")
+                print("⏹️  WEB: Closing bins (0°)")
             return True
         except Exception as e:
             print(f"⚠️  Servo control error: {e}")
