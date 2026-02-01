@@ -273,10 +273,16 @@ class SortacleWebViewer:
         
         try:
             if action == 'open':
-                self.servo_kit.servo[SERVO_CH].angle = 90  # Keep at center for manual
-                print("📂 WEB: Opening bins (90°)")
+                # Alternate between recyclable (180) and trash (0) positions
+                current = self.servo_kit.servo[SERVO_CH].angle
+                if current == 90 or current == 0:
+                    self.servo_kit.servo[SERVO_CH].angle = 180
+                    print("📂 WEB: Opening recyclable bin (180°)")
+                else:
+                    self.servo_kit.servo[SERVO_CH].angle = 0
+                    print("📂 WEB: Opening trash bin (0°)")
             elif action == 'close':
-                self.servo_kit.servo[SERVO_CH].angle = 90  # Center position
+                self.servo_kit.servo[SERVO_CH].angle = 90
                 print("⏹️  WEB: Closing bins (90°)")
             return True
         except Exception as e:
