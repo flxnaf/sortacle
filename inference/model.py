@@ -18,7 +18,7 @@ WASTE_CATEGORIES = [
     "cardboard",
     "paper",
     "cup",
-    # Non-recyclable items
+    # Non-recyclable items (original)
     "plastic bag",
     "chip bag",
     "food package",
@@ -31,6 +31,18 @@ WASTE_CATEGORIES = [
     "plastic utensil",
     "napkin",
     "tissue",
+    # Additional non-recyclable items (easy to detect)
+    "banana",              # Food waste - distinctive shape
+    "apple",               # Food waste - round, easy to detect
+    "orange",              # Food waste - round, colorful
+    "phone",               # Electronics - distinctive
+    "pen",                 # Writing utensil - small but linear
+    "pencil",              # Writing utensil
+    "battery",             # Hazardous waste
+    "light bulb",          # Hazardous waste
+    "toy",                 # Plastic waste
+    "plastic wrapper",     # More general wrapper
+    "food container",      # General container
 ]
 
 print("Loading YOLO-World model for open-vocabulary waste detection...")
