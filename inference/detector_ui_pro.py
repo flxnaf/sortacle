@@ -415,6 +415,10 @@ class SortacleUIPro:
                 
                 key = cv2.waitKey(1) & 0xFF
                 
+                # DEBUG: Show key presses
+                if key != 255:  # 255 means no key pressed
+                    print(f"🔍 DEBUG: Key pressed: {key} (chr: {chr(key) if key < 128 else 'N/A'})")
+                
                 # Check if window was closed (red X button)
                 try:
                     if cv2.getWindowProperty(win_name, cv2.WND_PROP_VISIBLE) < 1:
@@ -428,22 +432,36 @@ class SortacleUIPro:
                     break
                 elif key == ord(' '): 
                     self.paused = not self.paused
+                    print(f"🔍 DEBUG: SPACE pressed - paused={self.paused}")
                 elif key == ord('s'): 
                     self.show_settings = not self.show_settings
+                    print(f"🔍 DEBUG: S pressed - show_settings={self.show_settings}")
                 
                 # Manual servo controls (for demo)
                 elif key == ord('r'):  # R = Open Recyclable bin
+                    print(f"🔍 DEBUG: R pressed - enable_servo={self.enable_servo}, servo_kit={self.servo_kit is not None}")
                     if self.enable_servo and self.servo_kit:
                         print("🔵 MANUAL: Opening RECYCLABLE bin (80°)")
                         self.servo_kit.servo[SERVO_CH].angle = 80
+                        print("🔍 DEBUG: Servo command sent")
+                    else:
+                        print("⚠️  DEBUG: Servo not available!")
                 elif key == ord('t'):  # T = Open Trash bin
+                    print(f"🔍 DEBUG: T pressed - enable_servo={self.enable_servo}, servo_kit={self.servo_kit is not None}")
                     if self.enable_servo and self.servo_kit:
                         print("🔴 MANUAL: Opening TRASH bin (160°)")
                         self.servo_kit.servo[SERVO_CH].angle = 160
+                        print("🔍 DEBUG: Servo command sent")
+                    else:
+                        print("⚠️  DEBUG: Servo not available!")
                 elif key == ord('c'):  # C = Close/Center
+                    print(f"🔍 DEBUG: C pressed - enable_servo={self.enable_servo}, servo_kit={self.servo_kit is not None}")
                     if self.enable_servo and self.servo_kit:
                         print("⏹️  MANUAL: Closing bin (0°)")
                         self.servo_kit.servo[SERVO_CH].angle = 0
+                        print("🔍 DEBUG: Servo command sent")
+                    else:
+                        print("⚠️  DEBUG: Servo not available!")
                 
                 elapsed = time.time() - start
                 time.sleep(max(0, (1.0/self.display_fps) - elapsed))
