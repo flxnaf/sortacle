@@ -6,14 +6,14 @@ Lookup table mapping waste categories to recyclable status
 # Recyclability lookup table - simplified to match detection classes
 # True = Recyclable, False = Non-recyclable/Trash
 RECYCLABILITY_TABLE = {
-    # Recyclable (simplified)
+    # Recyclable
     "can": True,
     "bottle": True,
     "cardboard box": True,
     "cardboard": True,
     "paper": True,
-    "cup": True,
-    # Non-recyclable
+    # Non-recyclable (adjusted for demo - cups are often not recyclable)
+    "cup": False,  # Disposable cups have plastic lining
     "plastic bag": False,
     "chip bag": False,
     "food package": False,
