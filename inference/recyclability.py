@@ -21,6 +21,11 @@ RECYCLABILITY_TABLE = {
     "styrofoam": False,
     "foam container": False,
     "straw": False,
+    "fork": False,
+    "spoon": False,
+    "plastic utensil": False,
+    "napkin": False,
+    "tissue": False,
 }
 
 

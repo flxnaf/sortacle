@@ -26,6 +26,11 @@ WASTE_CATEGORIES = [
     "styrofoam",
     "foam container",
     "straw",
+    "fork",
+    "spoon",
+    "plastic utensil",
+    "napkin",
+    "tissue",
 ]
 
 print("Loading YOLO-World model for open-vocabulary waste detection...")
