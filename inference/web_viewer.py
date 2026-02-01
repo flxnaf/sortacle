@@ -107,7 +107,8 @@ class SortacleWebViewer:
         self.bin_id = bin_id
         self.location = location
         self.logger = DataLogger(db_path) if enable_logging else None
-        self.last_logged_items = set()
+        self.last_detection_time = 0  # Timestamp of last detection
+        self.cooldown_seconds = 5  # Minimum time between detections
         
         # Servo control
         self.enable_servo = enable_servo and SERVO_AVAILABLE
@@ -154,30 +155,34 @@ class SortacleWebViewer:
                 
                 # Log and trigger servo if needed
                 if self.latest_detections:
-                    best_detection = max(self.latest_detections, key=lambda x: x['confidence'])
-                    item_key = best_detection['label'].lower()
+                    current_time = time.time()
                     
-                    if item_key not in self.last_logged_items:
-                        recyclable = is_recyclable(best_detection['label'])
-                        
-                        if self.enable_logging and self.logger:
-                            # Create simplified detection dict for logging
-                            detection_dict = {
-                                'label': 'recyclable' if recyclable else 'non-recyclable',
-                                'confidence': best_detection['confidence'],
-                                'recyclable': recyclable
-                            }
-                            self.logger.log_disposal(
-                                detection=detection_dict,
-                                bin_id=self.bin_id,
-                                location=self.location
-                            )
-                        
-                        self.last_logged_items.add(item_key)
-                        
-                        # Trigger servo
-                        if self.enable_servo:
-                            self.move_servo_for_item(recyclable, best_detection['label'])
+                    # Check if cooldown period has passed
+                    if current_time - self.last_detection_time < self.cooldown_seconds:
+                        continue
+                    
+                    best_detection = max(self.latest_detections, key=lambda x: x['confidence'])
+                    recyclable = is_recyclable(best_detection['label'])
+                    
+                    # Log detection
+                    if self.enable_logging and self.logger:
+                        detection_dict = {
+                            'label': 'recyclable' if recyclable else 'non-recyclable',
+                            'confidence': best_detection['confidence'],
+                            'recyclable': recyclable
+                        }
+                        self.logger.log_disposal(
+                            detection=detection_dict,
+                            bin_id=self.bin_id,
+                            location=self.location
+                        )
+                    
+                    # Trigger servo
+                    if self.enable_servo:
+                        self.move_servo_for_item(recyclable, best_detection['label'])
+                    
+                    # Update last detection time
+                    self.last_detection_time = current_time
                 
             except queue.Empty:
                 continue
