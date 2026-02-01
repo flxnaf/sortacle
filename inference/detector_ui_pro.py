@@ -16,6 +16,7 @@ from camera import Camera
 from cloud_inference import run_cloud_inference, CLOUD_ENDPOINT, test_cloud_connection
 from local_inference import run_local_inference
 from recyclability import is_recyclable
+from data_logger import DataLogger
 
 # Color Palette (Modern/Elegant)
 ACCENT_GREEN = (120, 230, 100)  # Recyclable
@@ -49,7 +50,9 @@ def draw_filled_rounded_rect(img, pt1, pt2, color, r):
     img[mask > 0] = color
 
 class SortacleUIPro:
-    def __init__(self, confidence_threshold=0.50, display_fps=30.0):
+    def __init__(self, confidence_threshold=0.50, display_fps=30.0, 
+                 bin_id='bin_001', location='Brown University', 
+                 enable_logging=True, db_path='sortacle_data.db'):
         self.latest_detections = []
         self.detection_lock = threading.Lock()
         self.inference_source = "none"
@@ -64,6 +67,14 @@ class SortacleUIPro:
         self.frame_queue = queue.Queue(maxsize=2)
         self.frame_count = 0
         self.detection_count = 0
+        
+        # Data logging
+        self.enable_logging = enable_logging
+        self.bin_id = bin_id
+        self.location = location
+        self.logger = DataLogger(db_path) if enable_logging else None
+        self.logged_count = 0
+        self.last_logged_items = set()  # Track recently logged to avoid duplicates
 
     def draw_glass_panel(self, frame, x1, y1, x2, y2, opacity=0.85):
         """Draw a semi-transparent 'glass' panel"""
@@ -123,9 +134,11 @@ class SortacleUIPro:
             draw_filled_rounded_rect(display_frame, (p_x + 20, y), (p_x + 240, y + btn_h), l_color, 8)
             cv2.putText(display_frame, "FORCE LOCAL AI", (p_x + 70, y + 23), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_WHITE, 1, cv2.LINE_AA)
             
-            y = h - 60
+            y = h - 80
             cv2.putText(display_frame, f"Frames: {self.frame_count}", (p_x + 20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
             cv2.putText(display_frame, f"Detections: {self.detection_count}", (p_x + 20, y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (120, 120, 120), 1)
+            if self.enable_logging:
+                cv2.putText(display_frame, f"Logged: {self.logged_count}", (p_x + 20, y + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, ACCENT_GREEN, 1)
         else:
             cv2.putText(display_frame, "Press 'S' for Settings", (w - 180, h - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1, cv2.LINE_AA)
 
@@ -222,6 +235,31 @@ class SortacleUIPro:
                 for i, d in enumerate(filtered):
                     print(f"  ✓ [{i+1}] {d['label']}: {d['confidence']:.1%}")
                 
+                # Log high-confidence detections to database
+                if self.enable_logging and self.logger and len(filtered) > 0:
+                    # Log the highest confidence detection (the one that would trigger bin opening)
+                    best_detection = max(filtered, key=lambda x: x['confidence'])
+                    
+                    # Avoid logging duplicate items within 5 seconds
+                    item_key = f"{best_detection['label']}_{int(time.time() / 5)}"
+                    if item_key not in self.last_logged_items:
+                        try:
+                            self.logger.log_disposal(
+                                best_detection, 
+                                bin_id=self.bin_id,
+                                location=self.location
+                            )
+                            self.logged_count += 1
+                            self.last_logged_items.add(item_key)
+                            
+                            # Keep only recent items in memory (last 10)
+                            if len(self.last_logged_items) > 10:
+                                self.last_logged_items.pop()
+                            
+                            print(f"[DATA] Logged to database (Total logged: {self.logged_count})")
+                        except Exception as e:
+                            print(f"[DATA ERROR] Failed to log: {e}")
+                
                 with self.detection_lock:
                     self.latest_detections = filtered
                     self.inference_source = source
@@ -290,7 +328,37 @@ class SortacleUIPro:
             self.running = False
             self.camera.release()
             cv2.destroyAllWindows()
-            print(f"Total frames: {self.frame_count}, Detections: {self.detection_count}")
+            print(f"\nSession Summary:")
+            print(f"  Total frames: {self.frame_count}")
+            print(f"  Detections: {self.detection_count}")
+            print(f"  Logged to DB: {self.logged_count}")
+            
+            # Print final stats if logging enabled
+            if self.enable_logging and self.logger:
+                try:
+                    stats = self.logger.get_stats()
+                    print(f"\n📊 Database Stats:")
+                    print(f"  Total disposals: {stats['total_disposals']}")
+                    print(f"  Recycling rate: {stats['recycling_rate']:.1%}")
+                    print(f"  Today's count: {stats['today_count']}")
+                except Exception as e:
+                    print(f"  Could not fetch stats: {e}")
 
 if __name__ == "__main__":
-    SortacleUIPro().run()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Sortacle Vision AI Pro')
+    parser.add_argument('--bin-id', type=str, default='bin_001', help='Unique bin identifier')
+    parser.add_argument('--location', type=str, default='Brown University', help='Bin location')
+    parser.add_argument('--no-logging', action='store_true', help='Disable data logging')
+    parser.add_argument('--db-path', type=str, default='sortacle_data.db', help='Database file path')
+    
+    args = parser.parse_args()
+    
+    ui = SortacleUIPro(
+        bin_id=args.bin_id,
+        location=args.location,
+        enable_logging=not args.no_logging,
+        db_path=args.db_path
+    )
+    ui.run()
