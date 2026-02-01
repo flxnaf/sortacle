@@ -98,35 +98,75 @@ class SortacleUIPro:
                 print(f"⚠️  Failed to initialize servo: {e}")
                 self.enable_servo = False
 
-    def move_servo_for_item(self, recyclable: bool):
+    def move_servo_for_item(self, recyclable: bool, current_label: str):
         """
-        Move servo to appropriate bin based on recyclability.
+        Smart servo control: opens bin, waits for item to drop and leave view, then closes.
         
         Args:
             recyclable: True for recyclable bin, False for trash bin
+            current_label: Label of detected item (e.g., "glass bottle")
         """
         if not self.enable_servo or not self.servo_kit:
             return
         
         try:
-            # Recyclable: rotate to 0° (inverted to 180°)
-            # Trash: rotate to 180° (inverted to 0°)
+            # 1. Open the appropriate bin
             target_angle = 0 if recyclable else 180
             actual_angle = 180 - target_angle  # Inverted as per servo_move.py
             
             self.servo_kit.servo[SERVO_CH].angle = actual_angle
             bin_type = "♻️ RECYCLABLE" if recyclable else "🗑️ TRASH"
-            print(f"🔄 SERVO: Moving to {bin_type} bin (angle {target_angle}°)")
+            print(f"🔄 SERVO: Opening {bin_type} bin (angle {target_angle}°)")
             
-            # Wait for servo to complete movement
-            time.sleep(1.5)
+            # 2. Wait for item to start rolling down (allow time for gravity)
+            time.sleep(2.0)
             
-            # Return to center position
+            # 3. Check if item has left the view (with timeout and flexibility)
+            print(f"⏳ SERVO: Waiting for '{current_label}' to clear...")
+            max_wait_time = 5.0  # Maximum 5 seconds wait
+            check_interval = 0.3  # Check every 300ms
+            waited = 0
+            item_gone = False
+            consecutive_clear_checks = 0
+            required_clear_checks = 2  # Need 2 consecutive checks without item (flexibility)
+            
+            while waited < max_wait_time:
+                time.sleep(check_interval)
+                waited += check_interval
+                
+                # Check current detections
+                with self.detection_lock:
+                    current_detections = self.latest_detections.copy()
+                
+                # See if the same item type is still detected
+                item_still_visible = any(
+                    det['label'].lower() == current_label.lower() 
+                    for det in current_detections
+                )
+                
+                if not item_still_visible:
+                    consecutive_clear_checks += 1
+                    if consecutive_clear_checks >= required_clear_checks:
+                        item_gone = True
+                        print(f"✅ SERVO: '{current_label}' cleared from view")
+                        break
+                else:
+                    consecutive_clear_checks = 0  # Reset if item reappears
+            
+            if not item_gone:
+                print(f"⚠️  SERVO: Timeout waiting for item to clear (waited {waited:.1f}s)")
+            
+            # 4. Close the bin (return to center)
             self.servo_kit.servo[SERVO_CH].angle = 90
-            print(f"↩️  SERVO: Returned to center (90°)")
+            print(f"↩️  SERVO: Closed - ready for next item (90°)")
             
         except Exception as e:
             print(f"⚠️  Servo movement error: {e}")
+            # Emergency: return to center position
+            try:
+                self.servo_kit.servo[SERVO_CH].angle = 90
+            except:
+                pass
 
     def draw_glass_panel(self, frame, x1, y1, x2, y2, opacity=0.85):
         """Draw a semi-transparent 'glass' panel"""
@@ -309,8 +349,8 @@ class SortacleUIPro:
                             print(f"📊 LOGGED: {best_detection['label']} ({best_detection.get('category', 'other')}) [{best_detection['confidence']:.0%}] - Recyclable: {recyclable} [ID: {self.logged_count}]")
                             print(f"[DATA] Logged to database (Total logged: {self.logged_count})")
                             
-                            # Move servo to appropriate bin
-                            self.move_servo_for_item(recyclable)
+                            # Move servo to appropriate bin with smart waiting
+                            self.move_servo_for_item(recyclable, best_detection['label'])
                             
                         except Exception as e:
                             print(f"[DATA ERROR] Failed to log: {e}")
