@@ -1,0 +1,6 @@
+# Servo-specific Python dependencies
+# Install these inside a virtualenv used for running the servo scripts.
+
+adafruit-circuitpython-servokit
+adafruit-blinka
+smbus2  # optional: helpful on some systems for I2C access
