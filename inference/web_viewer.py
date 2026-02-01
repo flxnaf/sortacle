@@ -453,11 +453,17 @@ def get_stats():
         recyclable = result[0] if result[0] else 0
         non_recyclable = result[1] if result[1] else 0
         
-        return {
+        response = {
             'recyclable': recyclable,
             'non_recyclable': non_recyclable,
             'total': recyclable + non_recyclable
         }
+        
+        # Add CORS headers
+        from flask import jsonify
+        resp = jsonify(response)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        return resp
     except Exception as e:
         print(f"⚠️  Stats error: {e}")
         return {'error': str(e)}, 500
