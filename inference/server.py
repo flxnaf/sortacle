@@ -9,7 +9,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image
 import io
-from run_inference import run_inference
+import numpy as np
+from local_inference import run_local_inference
 
 app = FastAPI(title="Sortacle Inference API")
 
@@ -53,13 +54,14 @@ async def infer(file: UploadFile = File(...)):
         if image.mode != "RGB":
             image = image.convert("RGB")
         
-        # Resize to 640x640 (standard input size for many CV models)
+        # Resize to 640x640 (standard input size for YOLO)
         image = image.resize((640, 640), Image.Resampling.LANCZOS)
         
-        # Run inference
-        # TODO: This currently returns mock data
-        # Later: integrate YOLO or custom trained model here
-        predictions = run_inference(image)
+        # Convert PIL to numpy array for YOLO-World
+        frame = np.array(image)
+        
+        # Run real YOLO-World inference
+        predictions = run_local_inference(frame)
         
         return JSONResponse(content=predictions)
         
